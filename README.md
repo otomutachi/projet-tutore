@@ -194,13 +194,11 @@ Les résultats sont sauvegardés en JSON avec:
 
 ## 🤝 Contributeurs
 
-- Cedric M - Implémentation principale
-- Valère BILLAUD - Supervision & recherche
+- Cedric MAVIET
+- Valère BILLAUD 
 
 ## 📅 Roadmap
 
-- [ ] Intégration Deepseek, Mistral
-- [ ] Support Gemini API
 - [ ] AST analysis avec tree-sitter complet
 - [ ] Dashboard de visualisation (Streamlit)
 - [ ] Benchmark comparatif LLMs
