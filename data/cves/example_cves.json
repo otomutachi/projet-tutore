@@ -1,0 +1,18 @@
+[
+  {
+    "id": "CVE-2018-20548",
+    "cwe": "CWE-190",
+    "description": "Integer overflow in libimagequant when allocating memory for dither pixels - improper use of int instead of size_t",
+    "vulnerable_code": "struct image {\n  char *pixels;\n  int w, h;\n  struct img_dither *dither;\n  void *priv;\n};",
+    "patch_code": "struct image {\n  char *pixels;\n  size_t w, h;\n  struct img_dither *dither;\n  void *priv;\n};",
+    "reference_commit": "https://github.com/ImageMagick/ImageMagick/commit/..."
+  },
+  {
+    "id": "CVE-2021-12345",
+    "cwe": "CWE-191",
+    "description": "Integer underflow vulnerability when processing image dimensions",
+    "vulnerable_code": "unsigned int calculate_size(unsigned int width, unsigned int height) {\n  return width - 10 * height;\n}",
+    "patch_code": "size_t calculate_size(size_t width, size_t height) {\n  if (height > width / 10) return 0;\n  return width - 10 * height;\n}",
+    "reference_commit": "https://example.com"
+  }
+]
