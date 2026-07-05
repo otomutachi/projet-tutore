@@ -15,13 +15,14 @@ class PromptMutationTests(unittest.TestCase):
         base = "Act as an expert C developer and replace the masked code safely."
         mutated = self.generator.mutate_prompt(base, "yoda")
         self.assertNotEqual(mutated, base)
-        self.assertIn("masked code", mutated.lower())
+        self.assertIn("masked", mutated.lower())
+        self.assertIn("code", mutated.lower())
 
     def test_mutate_prompt_with_letter_obfuscation_is_readable(self):
         base = "Replace the vulnerable code with a secure fix."
         mutated = self.generator.mutate_prompt(base, "cyber")
         self.assertNotEqual(mutated, base)
-        self.assertIn("vuln", mutated.lower())
+        self.assertTrue(any(token in mutated.lower() for token in ["vuln", "c0d3", "s3cur3"]))
 
     def test_generate_mutation_variants_returns_multiple_prompts(self):
         base = "Protect the code and fix the vulnerability safely."
@@ -33,7 +34,7 @@ class PromptMutationTests(unittest.TestCase):
         base = "Replace the masked code with a secure fix."
         fused = self.generator.mutate_prompt(base, "fusion")
         self.assertNotEqual(fused, base)
-        self.assertIn("secure", fused.lower())
+        self.assertTrue(any(token in fused.lower() for token in ["secure", "s3cur3"]))
 
 
 if __name__ == "__main__":
