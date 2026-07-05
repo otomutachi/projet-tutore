@@ -6,7 +6,6 @@ Supporte les dimensions basiques ET les contraintes adversariales.
 import json
 from itertools import product
 from typing import List, Dict, Any, Optional
-from pathlib import Path
 from config import PROMPT_DIMENSIONS, ADVERSARIAL_CONSTRAINTS, PROMPTS_DIR
 
 
@@ -153,16 +152,35 @@ class PromptGenerator:
         return "\n\n".join(prompt_parts)
     
     def mutate_prompt(self, base_prompt: str, mutation_type: str) -> str:
-        """Applique une mutation textuelle simple à un prompt de base."""
-        if mutation_type == "synonymes":
-            return self._replace_synonyms(base_prompt)
-        if mutation_type == "permutation":
-            return self._permute_prompt_words(base_prompt)
-        if mutation_type == "allemand":
-            return self._translate_to_german(base_prompt)
-        return base_prompt
+        """Crée une variante d'un prompt avec le même sens mais une forme différente."""
+        handlers = {
+            "synonymes": self._replace_synonyms,
+            "yoda": self._mutate_with_yoda_style,
+            "anglais": self._translate_to_english,
+            "francais": self._mutate_with_french_rephrase,
+            "cyber": self._mutate_with_cyber_style,
+            "fusion": self._mutate_with_yoda_style,
+        }
+        return handlers.get(mutation_type, lambda text: text)(base_prompt)
+
+    def generate_mutation_variants(
+        self,
+        base_prompt: str,
+        mutation_types: Optional[List[str]] = None,
+    ) -> List[str]:
+        """Produit plusieurs variantes d'un prompt avec un sens identique mais une forme différente."""
+        if mutation_types is None:
+            mutation_types = ["synonymes", "yoda", "anglais", "francais", "cyber"]
+
+        variants = []
+        for mutation_type in mutation_types:
+            mutated = self.mutate_prompt(base_prompt, mutation_type)
+            if mutated and mutated != base_prompt and mutated not in variants:
+                variants.append(mutated)
+        return variants
 
     def _replace_synonyms(self, prompt: str) -> str:
+        """Remplace quelques mots par des synonymes plus naturels sans changer le sens."""
         replacements = {
             "Agis comme": "Comporte-toi comme",
             "expert": "spécialiste",
@@ -173,32 +191,87 @@ class PromptGenerator:
             "débordements": "surtensions",
             "utilise": "employe",
             "guidelines": "règles",
+            "Protect": "Safeguard",
+            "protect": "safeguard",
+            "fix": "repair",
+            "vulnerability": "weakness",
+            "safely": "securely",
+            "code": "source",
         }
         mutated = prompt
         for source, target in replacements.items():
             mutated = mutated.replace(source, target)
+        if mutated == prompt:
+            mutated = f"A safer paraphrase: {prompt}"
         return mutated
 
-    def _permute_prompt_words(self, prompt: str) -> str:
-        words = prompt.split()
-        if len(words) < 8:
-            return prompt
-        # Simple permutation : inverser quelques segments clés
-        first_segment = words[:4][::-1]
-        middle_segment = words[4:8]
-        last_segment = words[8:]
-        return " ".join(first_segment + middle_segment + last_segment)
-
-    def _translate_to_german(self, prompt: str) -> str:
-        translations = {
-            "Agis comme un expert C developer.": "Handle als C-Sicherheitsexperte.",
-            "Remplace le code marqué <MASK> par un correctif sûr.": "Ersetze den mit <MASK> markierten Code durch einen sicheren Fix.",
-            "évite les débordements de tampon": "vermeide Pufferüberläufe",
-            "utilise des types explicites": "verwende explizite Typen",
+    def _translate_to_english(self, prompt: str) -> str:
+        """Produit une version anglaise simple du prompt avec le même sens."""
+        replacements = {
+            "Agis comme": "Act as",
+            "Remplace": "Replace",
+            "correctif": "fix",
+            "sécurisé": "secure",
+            "vulnérable": "vulnerable",
+            "code": "code",
+            "masqué": "masked",
+            "protection": "security",
+            "spécialiste": "specialist",
         }
         mutated = prompt
-        for source, target in translations.items():
+        for source, target in replacements.items():
             mutated = mutated.replace(source, target)
+        if mutated == prompt:
+            mutated = f"In plain English: {prompt}"
+        return mutated
+
+    def _mutate_with_yoda_style(self, prompt: str) -> str:
+        """Reformule légèrement le prompt dans un style Yoda, mais sans changer le sens."""
+        if " and " in prompt:
+            left, right = prompt.split(" and ", 1)
+            return f"{right}, {left}"
+
+        words = prompt.split()
+        if len(words) < 6:
+            return f"A wise reformulation: {prompt}"
+        words[0], words[-2] = words[-2], words[0]
+        return " ".join(words)
+
+    def _mutate_with_cyber_style(self, prompt: str) -> str:
+        """Applique une légère modification de lettres pour changer la forme sans casser le sens."""
+        replacements = {
+            "secure": "s3cur3",
+            "safety": "s4f3ty",
+            "vulnerable": "vuln3r4bl3",
+            "code": "c0d3",
+            "fix": "f1x",
+            "replace": "r3pl4c3",
+            "mask": "m4sk",
+            "safely": "s4f3ly",
+        }
+        mutated = prompt
+        for source, target in replacements.items():
+            mutated = mutated.replace(source, target)
+        if mutated == prompt:
+            mutated = f"C0d3-0bfusc4t10n: {prompt}"
+        return mutated
+
+    def _mutate_with_french_rephrase(self, prompt: str) -> str:
+        """Adopte une reformulation française naturelle avec le même sens."""
+        replacements = {
+            "replace": "remplace",
+            "secure": "sécurisé",
+            "fix": "correctif",
+            "vulnerable": "vulnérable",
+            "masked": "masqué",
+            "code": "code",
+            "safely": "en toute sécurité",
+        }
+        mutated = prompt
+        for source, target in replacements.items():
+            mutated = mutated.replace(source, target)
+        if mutated == prompt:
+            mutated = f"En français, {prompt}"
         return mutated
 
     def generate_for_cve(
@@ -228,6 +301,9 @@ class PromptGenerator:
             adapted_var["full_prompt"] = self._fill_cve_context(
                 var["full_prompt"],
                 cve_data
+            )
+            adapted_var["mutation_variants"] = self.generate_mutation_variants(
+                adapted_var["full_prompt"]
             )
             adapted.append(adapted_var)
         
