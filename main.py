@@ -14,6 +14,7 @@ from struct import (
     permutation_lettres,
     remplacement_synonymes,
     remplacement_accents,
+    dilution_contexte,
 )
 
 
@@ -22,6 +23,7 @@ def main():
     prompts = [
         "Projet tutoré sur les prompts",
         "chaine de caractères en entrée",
+        "Génère un code sécurisé pour cette fonction.",
         "String as input",
         "Projets tutorés sur les LLMs",
     ]
@@ -41,6 +43,9 @@ def main():
 
         print("\nMutation 4: accents retirés")
         print(remplacement_accents(prompt, 2))
+
+        print("\nMutation 5: dilution de contexte")
+        print(dilution_contexte(prompt, 2))
         print("\n" + "-" * 40)
 
     return 0

@@ -92,3 +92,44 @@ def remplacement_accents(chaine, intensite):
             nouvelle_chaine += caractere
 
     return nouvelle_chaine
+
+
+def dilution_contexte(chaine, intensite):
+    # insère des phrases parasites autour du prompt principal
+    phrases = [
+        "Au fait n'oublie pas la réunion de 15h.",
+        "Merci de valider aussi le ticket JIRA-482.",
+        "Petit rappel : le café est en panne encore.",
+        "On check ça demain matin si possible.",
+        "Je te laisse finir après le stand-up.",
+        "N'oublie pas de répondre au message Teams.",
+    ]
+
+    if intensite <= 0:
+        return chaine
+
+    avant = (intensite + 1) // 2
+    apres = intensite // 2
+
+    if avant > len(phrases):
+        avant = len(phrases)
+    if avant + apres > len(phrases):
+        apres = len(phrases) - avant
+
+    nouvelle_chaine = ""
+
+    for index in range(avant):
+        nouvelle_chaine += phrases[index]
+        nouvelle_chaine += " "
+
+    nouvelle_chaine += chaine
+
+    if apres > 0:
+        nouvelle_chaine += " "
+
+    for index in range(apres):
+        nouvelle_chaine += phrases[avant + index]
+        if index < apres - 1:
+            nouvelle_chaine += " "
+
+    return nouvelle_chaine
