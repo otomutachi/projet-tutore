@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Point d'entrée principal du projet.
-
-Ce script affiche quelques variantes de prompts générées par le module
-prompts_generator pour illustrer le comportement du projet.
-"""
+# Script principal simple qui montre des mutations de prompts
 
 import sys
 from pathlib import Path
@@ -13,35 +9,42 @@ SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-from prompt_generator import PromptGenerator
+from struct import (
+    remplacement_e_par_3,
+    permutation_lettres,
+    remplacement_synonymes,
+    remplacement_accents,
+)
 
 
-def main() -> int:
-    """Génère et affiche des variantes de prompts simples."""
-    print("""
-    ============================================================
-      Prompt Mutation Demo
-      Génération de variantes de prompts avec le même sens
-    ============================================================
-    """)
+def main():
+    # liste de prompts d'exemple
+    prompts = [
+        "Projet tutoré sur les prompts",
+        "chaine de caractères en entrée",
+        "String as input",
+        "Projets tutorés sur les LLMs",
+    ]
 
-    generator = PromptGenerator()
-    base_prompt = "Replace the masked code with a secure fix."
-    variants = generator.generate_mutation_variants(
-        base_prompt,
-        mutation_types=["synonymes", "yoda", "anglais", "francais", "cyber"],
-    )
+    for prompt in prompts:
+        print("\nPrompt original:")
+        print(prompt)
 
-    if not variants:
-        print("[INFO] Aucune variante n'a pu être générée.")
-        return 1
+        print("\nMutation 1: e -> 3")
+        print(remplacement_e_par_3(prompt, 2))
 
-    print(f"[INFO] {len(variants)} variantes générées")
-    for index, variant in enumerate(variants, start=1):
-        print(f"{index}. {variant}")
+        print("\nMutation 2: permutation de lettres")
+        print(permutation_lettres(prompt, 2))
+
+        print("\nMutation 3: synonymes")
+        print(remplacement_synonymes(prompt, 2))
+
+        print("\nMutation 4: accents retirés")
+        print(remplacement_accents(prompt, 2))
+        print("\n" + "-" * 40)
 
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
