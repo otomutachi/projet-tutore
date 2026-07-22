@@ -1,0 +1,470 @@
+[
+  {
+    "mutation": "remplacement_e_par_3",
+    "proba": 0.2,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "Projet tutoré sur les prompts"
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "Chaîn3 de caractères en 3ntrée"
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "Génère un cod3 sécurisé pour c3tte fonction."
+      },
+      {
+        "original": "String as input",
+        "mute": "String as input"
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "Projets tutorés sur les LLMs"
+      }
+    ]
+  },
+  {
+    "mutation": "remplacement_e_par_3",
+    "proba": 0.8,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "Proj3t tutoré sur l3s prompts"
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "Chaîne d3 caractères 3n 3ntré3"
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "Génèr3 un cod3 sécurisé pour c3tt3 fonction."
+      },
+      {
+        "original": "String as input",
+        "mute": "String as input"
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "Proj3ts tutorés sur les LLMs"
+      }
+    ]
+  },
+  {
+    "mutation": "remplacement_accents",
+    "proba": 0.2,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "Projet tutoré sur les prompts"
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "Chaine de caractères en entrée"
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "Génere un code sécurisé pour cette fonction."
+      },
+      {
+        "original": "String as input",
+        "mute": "String as input"
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "Projets tutorés sur les LLMs"
+      }
+    ]
+  },
+  {
+    "mutation": "remplacement_accents",
+    "proba": 0.8,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "Projet tutoré sur les prompts"
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "Chaine de caracteres en entree"
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "Genère un code securise pour cette fonction."
+      },
+      {
+        "original": "String as input",
+        "mute": "String as input"
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "Projets tutores sur les LLMs"
+      }
+    ]
+  },
+  {
+    "mutation": "faute_de_frappe",
+    "proba": 0.2,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "Prpjey tutoré sir les prpmots"
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "Chaîne de caeactèrrs rn entrée"
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "Génèrr un code sécurisé ppir cettr foncyuon."
+      },
+      {
+        "original": "String as input",
+        "mute": "Strung qs inpit"
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "Projrts tutorés sue les LLMs"
+      }
+    ]
+  },
+  {
+    "mutation": "faute_de_frappe",
+    "proba": 0.8,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "Pepjrt yitpeé zur mez oepmoyz"
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "Chqînr fr cqeqcyèerz rn rnteér"
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "Génèer un cpfe zécieuzé opie cryyr doncyupn."
+      },
+      {
+        "original": "String as input",
+        "mute": "Syeung qz unoiy"
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "Pepjrys yuypeéz zie mez LLMz"
+      }
+    ]
+  },
+  {
+    "mutation": "alphabet_grec",
+    "proba": 0.2,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "Ρrojet tutοré sur les prompts"
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "Ϲhαîne de caractères en entrée"
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "Génère un cοde ςécuriςé ρour cette fonϲtion."
+      },
+      {
+        "original": "String as input",
+        "mute": "Σtring αs inρut"
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "Projets tutorés sυr les LLMs"
+      }
+    ]
+  },
+  {
+    "mutation": "alphabet_grec",
+    "proba": 0.8,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "Ρrοjεt tυtοré ςυr lες prοmρtς"
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "Chaînε dε ϲαrαctèrες εn εntréε"
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "Génèrε υn ϲodε ςéϲυriςé ρουr ϲεttε fοnϲtιon."
+      },
+      {
+        "original": "String as input",
+        "mute": "Σtrιng ας ιnpυt"
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "Prοjεtς tυtοrés ςυr lες LLMς"
+      }
+    ]
+  },
+  {
+    "mutation": "permutation_lettres",
+    "proba": 0.2,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "rPojet tutoér sur lesp rompst"
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "Chîane de craactères e nentére"
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "Génèreu n cod eséucirés puor cett efonciton."
+      },
+      {
+        "original": "String as input",
+        "mute": "Srting as input"
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "Projets tutoré ssu rels LLMs"
+      }
+    ]
+  },
+  {
+    "mutation": "permutation_lettres",
+    "proba": 0.8,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "Porjtet uotérs rul sep orpmst"
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "hCanî eedc racaèter snee tnére"
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "Gnérèeu  noceds cérusi éopruc teetf notcoi.n"
+      },
+      {
+        "original": "String as input",
+        "mute": "Stirgna si pntu"
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "rPoejt stutrosés u rel sLLsM"
+      }
+    ]
+  },
+  {
+    "mutation": "permutation_mots",
+    "proba": 0.2,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "tutoré Projet les sur prompts"
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "Chaîne caractères de entrée en"
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "un Génère code pour sécurisé fonction. cette"
+      },
+      {
+        "original": "String as input",
+        "mute": "String as input"
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "tutorés Projets les sur LLMs"
+      }
+    ]
+  },
+  {
+    "mutation": "permutation_mots",
+    "proba": 0.8,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "tutoré Projet sur prompts les"
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "Chaîne de en caractères entrée"
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "un Génère code pour sécurisé fonction. cette"
+      },
+      {
+        "original": "String as input",
+        "mute": "as String input"
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "tutorés Projets sur LLMs les"
+      }
+    ]
+  },
+  {
+    "mutation": "dilution_contexte",
+    "proba": 0.2,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "Projet tutoré sur les prompts Au fait n'oublie pas la réunion de 15h. On check ça demain matin si possible."
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "Chaîne de caractères en entrée Merci de valider aussi le ticket JIRA-482. Petit rappel : le café est en panne encore."
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "Génère un code sécurisé pour cette fonction. Merci de valider aussi le ticket JIRA-482. On check ça demain matin si possible."
+      },
+      {
+        "original": "String as input",
+        "mute": "String as input Merci de valider aussi le ticket JIRA-482."
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "Projets tutorés sur les LLMs Merci de valider aussi le ticket JIRA-482."
+      }
+    ]
+  },
+  {
+    "mutation": "dilution_contexte",
+    "proba": 0.8,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "Projet tutoré sur les prompts Au fait n'oublie pas la réunion de 15h. Merci de valider aussi le ticket JIRA-482. Petit rappel : le café est en panne encore. On check ça demain matin si possible. Je te laisse finir après le stand-up. N'oublie pas de répondre au message Teams."
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "Chaîne de caractères en entrée Au fait n'oublie pas la réunion de 15h. Merci de valider aussi le ticket JIRA-482. Petit rappel : le café est en panne encore. On check ça demain matin si possible. Je te laisse finir après le stand-up. N'oublie pas de répondre au message Teams."
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "Génère un code sécurisé pour cette fonction. Au fait n'oublie pas la réunion de 15h. Merci de valider aussi le ticket JIRA-482. Petit rappel : le café est en panne encore. On check ça demain matin si possible. Je te laisse finir après le stand-up. N'oublie pas de répondre au message Teams."
+      },
+      {
+        "original": "String as input",
+        "mute": "String as input Au fait n'oublie pas la réunion de 15h. Merci de valider aussi le ticket JIRA-482. On check ça demain matin si possible. Je te laisse finir après le stand-up."
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "Projets tutorés sur les LLMs Au fait n'oublie pas la réunion de 15h. Merci de valider aussi le ticket JIRA-482. Petit rappel : le café est en panne encore. On check ça demain matin si possible."
+      }
+    ]
+  },
+  {
+    "mutation": "remplacement_synonymes",
+    "proba": 0.2,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "Projet tutoré concernant les prompts"
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "Chaîne de caractères en entrée"
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "Génère un code sécurisé pour cette fonction."
+      },
+      {
+        "original": "String as input",
+        "mute": "String as input"
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "Projets tutorés sur les LLMs"
+      }
+    ]
+  },
+  {
+    "mutation": "remplacement_synonymes",
+    "proba": 0.8,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "Travail tutoré concernant les instructions"
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "Chaîne de lettres dans input"
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "Génère un code sécurisé pour cette fonction."
+      },
+      {
+        "original": "String as input",
+        "mute": "String as input"
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "Projets tutorés sur les LLMs"
+      }
+    ]
+  },
+  {
+    "mutation": "traduction_anglais",
+    "proba": 0.2,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "project tutoré sur les prompts"
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "Chaîne de characters en entrée"
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "Génère a code sécurisé pour cette fonction."
+      },
+      {
+        "original": "String as input",
+        "mute": "String as input"
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "Projets guided sur les LLMs"
+      }
+    ]
+  },
+  {
+    "mutation": "traduction_anglais",
+    "proba": 0.8,
+    "prompts": [
+      {
+        "original": "Projet tutoré sur les prompts",
+        "mute": "Projet tutoré about the prompts"
+      },
+      {
+        "original": "Chaîne de caractères en entrée",
+        "mute": "String de characters in input"
+      },
+      {
+        "original": "Génère un code sécurisé pour cette fonction.",
+        "mute": "Génère a code secure pour cette fonction."
+      },
+      {
+        "original": "String as input",
+        "mute": "String as input"
+      },
+      {
+        "original": "Projets tutorés sur les LLMs",
+        "mute": "Projets tutorés about the LLMs"
+      }
+    ]
+  }
+]
