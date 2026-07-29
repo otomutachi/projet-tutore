@@ -1,23 +1,15 @@
 import random
 
 from mutation_base import Mutation
+from utils import charger_dictionnaire_json
 
 
 class RemplacementSynonymes(Mutation):
     """Remplace certains mots par des synonymes simples."""
 
-    # Utilise le dictionnaire de synonymes exact fourni dans la version d'origine.
-    dictionnaire = {
-        "projet": "travail",
-        "tutoré": "guidé",
-        "prompts": "instructions",
-        "chaine": "suite",
-        "caractères": "lettres",
-        "entrée": "input",
-        "sur": "concernant",
-        "en": "dans",
-        "LLMs": "modèles",
-    }
+    def __init__(self):
+        super().__init__()
+        self.dictionnaire = charger_dictionnaire_json("data/synonymes.json")
 
     def apply(self, chaine: str, proba: float) -> str:
         mots = chaine.split()
@@ -83,7 +75,7 @@ class TraductionAnglais(Mutation):
             else:
                 nouvelle_liste.append(mot)
         resultat = " ".join(nouvelle_liste)
-        if resultat == chaine:
+        if proba > 0 and resultat == chaine:
             for mot in mots:
                 mot_propre = mot.strip(".,!?;:")
                 cle = mot_propre.lower()

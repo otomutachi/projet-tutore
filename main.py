@@ -17,7 +17,7 @@ from mutations_orthographiques import (
 )
 from mutations_semantiques import RemplacementSynonymes, TraductionAnglais
 from mutations_syntaxiques import DilutionContexte, PermutationLettres, PermutationMots
-from utils import afficher_resultats, charger_prompts, sauvegarder_prompts
+from utils import afficher_resultats, charger_prompts, charger_prompts_cve, sauvegarder_prompts
 
 
 def appliquer_mutations(chaine: str, liste_mutations, proba: float) -> str:
@@ -82,6 +82,21 @@ def main() -> int:
             )
 
     sauvegarder_prompts(resultats, PROJECT_ROOT / "resultats.json")
+
+    cve_prompts = charger_prompts_cve(PROJECT_ROOT / "prompts_cve.json")
+    if cve_prompts:
+        print("\n" + "=" * 60)
+        print("TEST A GRANDE ECHELLE AVEC PROMPTS CVE")
+        print("=" * 60)
+        exemples = list(cve_prompts.items())[:2]
+        mutations_grandes = [RemplacementSynonymes(), PermutationLettres(), DilutionContexte()]
+        for constraint, prompt in exemples:
+            print(f"\nContrainte : {constraint}")
+            # use afficher_resultats sanitizer by passing single-item lists
+            afficher_resultats([prompt], [prompt], nom_mutation="original_cve_preview")
+            for mutation in mutations_grandes:
+                resultat = mutation.appliquer(prompt, 0.7)
+                afficher_resultats([prompt], [resultat], nom_mutation=mutation.__class__.__name__)
 
     print("\n" + "=" * 60)
     print("Résultats sauvegardés dans 'resultats.json'")
