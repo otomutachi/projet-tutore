@@ -1,5 +1,10 @@
 import random
 
+try:
+    from PyDictionary import PyDictionary
+except ImportError:
+    PyDictionary = None
+
 from mutation_base import Mutation
 from utils import charger_dictionnaire_json
 

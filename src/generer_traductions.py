@@ -44,9 +44,9 @@ def generer_traductions() -> dict[str, str]:
     traducteur = PyDictionary()
     resultats: dict[str, str] = {}
     for terme in TERMES:
-        traductions = traducteur.translate(terme, "fr", "en")
-        if traductions:
-            resultats[terme] = traductions[0]
+        traduction = traducteur.translate(terme, "fr")
+        if traduction:
+            resultats[terme] = traduction
     return resultats
 
 
