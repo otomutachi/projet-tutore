@@ -32,43 +32,19 @@ class RemplacementSynonymes(Mutation):
 class TraductionAnglais(Mutation):
     """Traduit une petite liste de mots du français vers l'anglais."""
 
-    # Utilise un dictionnaire plus utile pour changer la langue et rendre la transformation visible.
-    dictionnaire = {
-        "projet": "project",
-        "tutoré": "guided",
-        "tutorés": "guided",
-        "prompts": "prompts",
-        "chaine": "string",
-        "chaîne": "string",
-        "caractères": "characters",
-        "caracteres": "characters",
-        "entrée": "input",
-        "entree": "input",
-        "sur": "about",
-        "en": "in",
-        "code": "code",
-        "sécurisé": "secure",
-        "secure": "secure",
-        "fonction": "function",
-        "génère": "generate",
-        "genere": "generate",
-        "pour": "for",
-        "cette": "this",
-        "cette": "this",
-        "des": "of",
-        "les": "the",
-        "un": "a",
-    }
+    dictionnaire = charger_dictionnaire_json("data/traduction.json")
+
+    def _traduire_mot(self, mot: str):
+        mot_propre = mot.strip(".,!?;:")
+        return self.dictionnaire.get(mot_propre.lower())
 
     def apply(self, chaine: str, proba: float) -> str:
         mots = chaine.split()
         nouvelle_liste = []
         for mot in mots:
-            mot_propre = mot.strip(".,!?;:")
-            cle = mot_propre.lower()
-            traduction = self.dictionnaire.get(cle)
+            traduction = self._traduire_mot(mot)
             if traduction is not None and random.random() <= proba:
-                if mot_propre.istitle():
+                if mot.strip(".,!?;:").istitle():
                     nouvelle_liste.append(traduction.capitalize())
                 else:
                     nouvelle_liste.append(traduction)
@@ -77,9 +53,7 @@ class TraductionAnglais(Mutation):
         resultat = " ".join(nouvelle_liste)
         if proba > 0 and resultat == chaine:
             for mot in mots:
-                mot_propre = mot.strip(".,!?;:")
-                cle = mot_propre.lower()
-                traduction = self.dictionnaire.get(cle)
+                traduction = self._traduire_mot(mot)
                 if traduction is not None:
                     resultat = resultat.replace(mot, traduction, 1)
                     break

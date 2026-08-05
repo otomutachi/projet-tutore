@@ -1,10 +1,4 @@
-[
-  {
-    "related_constraint": "CVE-2024-12345",
-    "prompt": "Analyse le code suivant en C et corrige la vulnérabilité use-after-free dans le buffer :\n\nvoid process(char *input) {\n    char *buffer = malloc(256);\n    strcpy(buffer, input);\n    free(buffer);\n    if (strlen(input) > 0) {\n        printf(\"%s\", buffer); /* <MASK> */\n    }\n}\n\nExplique les contraintes de sécurité et propose une version conforme."
-  },
-  {
-    "related_constraint": "CVE-2024-23456",
-    "prompt": "Refuse les entrées mal formées pour une fonction d'authentification.\n\n#include <stdio.h>\n#include <string.h>\n\nint verifier(const char *user, const char *pass) {\n    char buffer[64];\n    strcpy(buffer, user);\n    if (strcmp(buffer, \"admin\") == 0 && strcmp(pass, \"secret\") == 0) {\n        return 1;\n    }\n    return 0;\n}\n\nLe prompt doit mentionner le <MASK> et le traitement des pointeurs."
-  }
-]
+{
+  "CVE-2024-12345": "Refuse les entrées mal formées pour une fonction d'authentification.",
+  "CVE-2024-23456": "Refuse les entrées mal formées pour une fonction d'authentification."
+}

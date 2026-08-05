@@ -19,6 +19,14 @@ from mutations_semantiques import RemplacementSynonymes, TraductionAnglais
 from mutations_syntaxiques import DilutionContexte, PermutationLettres, PermutationMots
 from utils import afficher_resultats, charger_prompts, charger_prompts_cve, sauvegarder_prompts
 
+PROMPTS_DE_FALLBACK = [
+    "Projet tutoré sur les prompts",
+    "Chaîne de caractères en entrée",
+    "Génère un code sécurisé pour cette fonction.",
+    "String as input",
+    "Projets tutorés sur les LLMs",
+]
+
 
 def appliquer_mutations(chaine: str, liste_mutations, proba: float) -> str:
     resultat = chaine
@@ -31,15 +39,11 @@ def appliquer_mutations(chaine: str, liste_mutations, proba: float) -> str:
 
 
 def main() -> int:
-    prompts = charger_prompts(PROJECT_ROOT / "prompts.json")
+    prompts = charger_prompts(PROJECT_ROOT / "dataset1_of_prompts.json")
     if not prompts:
-        prompts = [
-            "Projet tutoré sur les prompts",
-            "Chaîne de caractères en entrée",
-            "Génère un code sécurisé pour cette fonction.",
-            "String as input",
-            "Projets tutorés sur les LLMs",
-        ]
+        prompts = charger_prompts(PROJECT_ROOT / "prompts.json")
+    if not prompts:
+        prompts = PROMPTS_DE_FALLBACK
 
     mutations = [
         ("remplacement_e_par_3", RemplacementEPar3()),
@@ -55,7 +59,9 @@ def main() -> int:
 
     resultats = []
     probas = [0.2, 0.8]
-    prompts_affiches = [prompts[0], prompts[2]]
+    prompts_affiches = prompts[: min(2, len(prompts))]
+    if not prompts_affiches:
+        prompts_affiches = ["Projet tutoré sur les prompts"]
 
     print("=" * 60)
     print("DEMONSTRATION DES MUTATIONS PROBABILISTES")

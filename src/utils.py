@@ -3,21 +3,26 @@ import os
 import re
 
 
-def charger_dictionnaire_json(chemin_fichier):
-    """Charge un fichier JSON contenant un dictionnaire de synonymes."""
+def _charger_json(chemin_fichier):
     chemin = chemin_fichier
     if not os.path.isabs(chemin):
         chemin = os.path.join(os.path.dirname(os.path.dirname(__file__)), chemin)
 
     if not os.path.exists(chemin):
-        print(f"Fichier de dictionnaire introuvable : {chemin_fichier}")
-        return {}
+        return None
 
     try:
         with open(chemin, "r", encoding="utf-8") as fichier:
-            dictionnaire = json.load(fichier)
-    except (json.JSONDecodeError, OSError) as erreur:
-        print(f"Erreur lors du chargement du dictionnaire JSON {chemin_fichier} : {erreur}")
+            return json.load(fichier)
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def charger_dictionnaire_json(chemin_fichier):
+    """Charge un fichier JSON contenant un dictionnaire de synonymes."""
+    dictionnaire = _charger_json(chemin_fichier)
+    if dictionnaire is None:
+        print(f"Fichier de dictionnaire introuvable ou invalide : {chemin_fichier}")
         return {}
 
     if not isinstance(dictionnaire, dict):
@@ -30,25 +35,24 @@ def charger_dictionnaire_json(chemin_fichier):
 
 def charger_prompts(chemin_fichier):
     """Charge une liste de prompts depuis un fichier JSON."""
-    if not os.path.exists(chemin_fichier):
+    donnees = _charger_json(chemin_fichier)
+    if not isinstance(donnees, list):
         return []
-    with open(chemin_fichier, "r", encoding="utf-8") as fichier:
-        donnees = json.load(fichier)
-    if isinstance(donnees, list):
-        return [str(item) for item in donnees]
-    return []
+
+    prompts = []
+    for item in donnees:
+        if isinstance(item, dict) and "prompt" in item:
+            prompts.append(str(item["prompt"]))
+        else:
+            prompts.append(str(item))
+    return prompts
 
 
 def charger_prompts_cve(chemin_fichier):
-    """Charge un fichier JSON de prompts CVE et retourne un dictionnaire.
-
-    La clé est le related_constraint et la valeur est le prompt associé.
-    Cette fonction reste en lecture seule et ne modifie jamais le fichier.
-    """
-    if not os.path.exists(chemin_fichier):
+    """Charge un fichier JSON de prompts CVE et retourne un dictionnaire."""
+    donnees = _charger_json(chemin_fichier)
+    if donnees is None:
         return {}
-    with open(chemin_fichier, "r", encoding="utf-8") as fichier:
-        donnees = json.load(fichier)
 
     dictionnaire_prompts = {}
     if isinstance(donnees, list):

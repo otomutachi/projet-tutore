@@ -2,15 +2,6 @@ import random
 
 
 class Mutation:
-    """Classe de base simple pour les mutations probabilistes.
-
-    Optimisations appliquées :
-    - Factorisation des boucles communes de remplacement dans la classe de base,
-      pour éviter de dupliquer la même logique dans plusieurs mutations.
-    - Les helpers restent simples, lisibles et adaptés à un niveau L3.
-    """
-
-    # Utilise une vérification simple pour garder la probabilité dans l'intervalle attendu.
     def appliquer(self, chaine: str, proba: float) -> str:
         if not 0 <= proba <= 1:
             raise ValueError("proba doit être compris entre 0 et 1")

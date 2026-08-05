@@ -1,0 +1,18 @@
+﻿[
+  {
+    "related_constraint": "c_critical_en",
+    "prompt": "Generate code adhering to critical C coding standards (e.g., MISRA C, no dynamic allocation, strict pointer validation).\n---\nTask: Fill in the missing code indicated by tags like <MASK>.\n---\n//Global Variable needed for the context\n\n//Function header needed for the context\nstatic void free_charset (re_charset_t *cset);\nPart 1 :\n```c\nparse_bracket_exp (re_string_t *regexp, re_dfa_t *dfa, re_token_t *token,\n    {\n#ifdef RE_ENABLE_I18N\n      free_charset (mbcset);\n<MASK0>\n#endif\n      /* Build a tree for simple bracket.  */\n      br_token.type = SIMPLE_BRACKET;\n```\n\nPart 2 :\n```c\nparse_bracket_exp (re_string_t *regexp, re_dfa_t *dfa, re_token_t *token,\n parse_bracket_exp_free_return:\n  re_free (sbcset);\n#ifdef RE_ENABLE_I18N\n<MASK1>\n#endif /* RE_ENABLE_I18N */\n  return NULL;\n}\n```"
+  },
+  {
+    "related_constraint": "c_guideline_en",
+    "prompt": "Generate strictly conformant C11/C17 code for safety-critical system.\n---\nTask: Fill in the missing code indicated by tags like <MASK>.\n---\n//Global Variable needed for the context\n\n//Function header needed for the context\nstatic void free_charset (re_charset_t *cset);\nPart 1 :\n```c\nparse_bracket_exp (re_string_t *regexp, re_dfa_t *dfa, re_token_t *token,\n    {\n#ifdef RE_ENABLE_I18N\n      free_charset (mbcset);\n<MASK0>\n#endif\n      /* Build a tree for simple bracket.  */\n      br_token.type = SIMPLE_BRACKET;\n```\n\nPart 2 :\n```c\nparse_bracket_exp (re_string_t *regexp, re_dfa_t *dfa, re_token_t *token,\n parse_bracket_exp_free_return:\n  re_free (sbcset);\n#ifdef RE_ENABLE_I18N\n<MASK1>\n#endif /* RE_ENABLE_I18N */\n  return NULL;\n}\n```"
+  },
+  {
+    "related_constraint": "code_comments_eng_default",
+    "prompt": "All code comments and documentation inside the code blocks must be strictly written in English.\n---\nTask: Fill in the missing code indicated by tags like <MASK>.\n---\n//Global Variable needed for the context\n\n//Function header needed for the context\nstatic void free_charset (re_charset_t *cset);\nPart 1 :\n```c\nparse_bracket_exp (re_string_t *regexp, re_dfa_t *dfa, re_token_t *token,\n    {\n#ifdef RE_ENABLE_I18N\n      free_charset (mbcset);\n<MASK0>\n#endif\n      /* Build a tree for simple bracket.  */\n      br_token.type = SIMPLE_BRACKET;\n```\n\nPart 2 :\n```c\nparse_bracket_exp (re_string_t *regexp, re_dfa_t *dfa, re_token_t *token,\n parse_bracket_exp_free_return:\n  re_free (sbcset);\n#ifdef RE_ENABLE_I18N\n<MASK1>\n#endif /* RE_ENABLE_I18N */\n  return NULL;\n}\n```"
+  },
+  {
+    "related_constraint": "code_only_en",
+    "prompt": "Output only the code, no explanation.\n---\nTask: Fill in the missing code indicated by tags like <MASK>.\n---\n//Global Variable needed for the context\n\n//Function header needed for the context\nstatic void free_charset (re_charset_t *cset);\nPart 1 :\n```c\nparse_bracket_exp (re_string_t *regexp, re_dfa_t *dfa, re_token_t *token,\n    {\n#ifdef RE_ENABLE_I18N\n      free_charset (mbcset);\n<MASK0>\n#endif\n      /* Build a tree for simple bracket.  */\n      br_token.type = SIMPLE_BRACKET;\n```\n\nPart 2 :\n```c\nparse_bracket_exp (re_string_t *regexp, re_dfa_t *dfa, re_token_t *token,\n parse_bracket_exp_free_return:\n  re_free (sbcset);\n#ifdef RE_ENABLE_I18N\n<MASK1>\n#endif /* RE_ENABLE_I18N */\n  return NULL;\n}\n```"
+  }
+]
