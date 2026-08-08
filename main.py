@@ -18,6 +18,7 @@ from mutations_orthographiques import (
 from mutations_semantiques import RemplacementSynonymes, TraductionAnglais
 from mutations_syntaxiques import DilutionContexte, PermutationLettres, PermutationMots
 from utils import afficher_resultats, charger_prompts, charger_prompts_cve, sauvegarder_prompts
+from pydict_wrapper import translate_text
 
 PROMPTS_DE_FALLBACK = [
     "Projet tutoré sur les prompts",
@@ -107,6 +108,17 @@ def main() -> int:
     print("\n" + "=" * 60)
     print("Résultats sauvegardés dans 'resultats.json'")
     print("=" * 60)
+
+    # Démonstration simple de la fonction de traduction PyDictionary
+    try:
+        exemple = "voiture rapide et sécurisée"
+        trad = translate_text(exemple, "en")
+        print("\n=== DEMO TRADUCTION PYDICTIONARY ===")
+        print("Original :", exemple)
+        print("Traduction (en) :", trad)
+    except Exception:
+        # Ne pas faire échouer le script si PyDictionary n'est pas disponible
+        pass
 
     return 0
 

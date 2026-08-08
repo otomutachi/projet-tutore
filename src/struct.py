@@ -15,7 +15,7 @@ from mutations_orthographiques import (
     remplacement_accents,
     remplacement_e_par_3,
 )
-from mutations_semantiques import RemplacementSynonymes, TraductionAnglais, remplacement_synonymes, traduction_anglais
+from mutations_semantiques import RemplacementSynonymes, TraductionGenerique, remplacement_synonymes, traduction_vers
 from mutations_syntaxiques import DilutionContexte, PermutationLettres, PermutationMots, dilution_contexte, permutation_lettres, permutation_mots
 
 
@@ -56,8 +56,9 @@ class RemplacementSynonymesCompat(RemplacementSynonymes, MutationBase):
     pass
 
 
-class TraductionAnglaisCompat(TraductionAnglais, MutationBase):
-    pass
+class TraductionAnglaisCompat(TraductionGenerique, MutationBase):
+    def __init__(self):
+        super().__init__(target_lang='en')
 
 
 def appliquer_mutations(chaine, liste_mutations, proba):
