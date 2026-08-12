@@ -17,7 +17,7 @@ from mutations_orthographiques import (
 )
 from mutations_semantiques import RemplacementSynonymes, TraductionAnglais
 from mutations_syntaxiques import DilutionContexte, PermutationLettres, PermutationMots
-from utils import afficher_resultats, charger_prompts, charger_prompts_cve, sauvegarder_prompts
+from helpers import afficher_resultats, charger_prompts, charger_prompts_cve, sauvegarder_prompts
 from pydict_wrapper import translate_text
 
 PROMPTS_DE_FALLBACK = [

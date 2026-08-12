@@ -12,7 +12,7 @@ if str(SRC_DIR) not in sys.path:
 from mutations_orthographiques import AlphabetGrec, FauteDeFrappe, RemplacementAccents, RemplacementEPar3
 from mutations_semantiques import RemplacementSynonymes, TraductionGenerique, remplacement_synonymes, traduction_vers
 from mutations_syntaxiques import DilutionContexte, PermutationLettres, PermutationMots
-from utils import charger_prompts_cve
+from helpers import charger_prompts_cve
 
 
 class TestMutations(unittest.TestCase):
