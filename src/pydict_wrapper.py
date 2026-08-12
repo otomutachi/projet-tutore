@@ -19,62 +19,62 @@ except Exception:
     PyDictionary = None
 
 
-_WORD_RE = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ]+")
+_REGEX_MOT = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ]+")
 
 
-def _suppress_pydictionary_output():
+def _masquer_sortie_pydictionary():
     return contextlib.redirect_stdout(io.StringIO())
 
 
-def _apply_case(token: str, traduction: str) -> str:
-    if token.istitle():
+def _appliquer_casse(mot: str, traduction: str) -> str:
+    if mot.istitle():
         return traduction.capitalize()
-    if token.isupper():
+    if mot.isupper():
         return traduction.upper()
     return traduction
 
 
-def _translate_token(token: str, dict_client: Optional[object], target_lang: str) -> str:
-    if dict_client is None:
-        return token
+def _traduire_mot(mot: str, client_dictionnaire: Optional[object], langue_cible: str) -> str:
+    if client_dictionnaire is None:
+        return mot
     try:
-        with _suppress_pydictionary_output():
-            translated = dict_client.translate(token, target_lang)
+        with _masquer_sortie_pydictionary():
+            traduit = client_dictionnaire.translate(mot, langue_cible)
     except Exception:
-        return token
-    if not translated:
-        return token
-    return _apply_case(token, translated)
+        return mot
+    if not traduit:
+        return mot
+    return _appliquer_casse(mot, traduit)
 
 
-def _lookup_synonyms(token: str, dict_client: Optional[object]) -> Optional[list[str]]:
-    if dict_client is None:
+def _rechercher_synonymes(mot: str, client_dictionnaire: Optional[object]) -> Optional[list[str]]:
+    if client_dictionnaire is None:
         return None
     try:
-        with _suppress_pydictionary_output():
-            synonyms = dict_client.synonym(token)
+        with _masquer_sortie_pydictionary():
+            synonymes = client_dictionnaire.synonym(mot)
     except Exception:
         return None
-    if not synonyms or not isinstance(synonyms, list):
+    if not synonymes or not isinstance(synonymes, list):
         return None
-    return synonyms
+    return synonymes
 
 
-def translate_text(text: str, target_lang: str = "en") -> str:
-    dict_client = PyDictionary() if PyDictionary is not None else None
+def traduire_texte(texte: str, langue_cible: str = "en") -> str:
+    client_dictionnaire = PyDictionary() if PyDictionary is not None else None
 
-    parts = re.split(r"(" + _WORD_RE.pattern + r")", text)
-    translated_parts = []
-    for part in parts:
-        if not part:
+    morceaux = re.split(r"(" + _REGEX_MOT.pattern + r")", texte)
+    morceaux_traduits = []
+    for morceau in morceaux:
+        if not morceau:
             continue
-        if _WORD_RE.fullmatch(part):
-            translated_parts.append(_translate_token(part, dict_client, target_lang))
+        if _REGEX_MOT.fullmatch(morceau):
+            morceaux_traduits.append(_traduire_mot(morceau, client_dictionnaire, langue_cible))
         else:
-            translated_parts.append(part)
-    return "".join(translated_parts)
+            morceaux_traduits.append(morceau)
+    return "".join(morceaux_traduits)
 
 
-def lookup_synonyms(term: str) -> Optional[list[str]]:
-    dict_client = PyDictionary() if PyDictionary is not None else None
-    return _lookup_synonyms(term, dict_client)
+def rechercher_synonymes(mot: str) -> Optional[list[str]]:
+    client_dictionnaire = PyDictionary() if PyDictionary is not None else None
+    return _rechercher_synonymes(mot, client_dictionnaire)

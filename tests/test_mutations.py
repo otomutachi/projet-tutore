@@ -42,10 +42,20 @@ class TestMutations(unittest.TestCase):
         resultat = remplacement_synonymes(entree, 1.0)
         self.assertIsInstance(resultat, str)
 
+    def test_remplacement_synonymes_phrase(self):
+        entree = "Projet tutoré sur les prompts"
+        resultat = remplacement_synonymes(entree, 1.0)
+        self.assertIsInstance(resultat, str)
+
     def test_traduction_generique_exemple(self):
         # Live translation test using PyDictionary; verify expected value manually.
         entree = "house"
         resultat = traduction_vers(entree, 'es', 1.0)
+        self.assertIsInstance(resultat, str)
+
+    def test_traduction_generique_phrase(self):
+        entree = "bonjour monde"
+        resultat = traduction_vers(entree, 'en', 1.0)
         self.assertIsInstance(resultat, str)
 
     def test_traduction_anglais_mot_connu_exact_projet(self):

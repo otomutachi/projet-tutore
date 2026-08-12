@@ -1,7 +1,7 @@
 import random
 
 from mutation_base import Mutation
-from pydict_wrapper import lookup_synonyms, translate_text
+from pydict_wrapper import rechercher_synonymes, traduire_texte
 
 
 class RemplacementSynonymes(Mutation):
@@ -17,7 +17,7 @@ class RemplacementSynonymes(Mutation):
         for mot in mots:
             mot_propre = mot.strip(".,!?;:")
             if random.random() <= proba:
-                syns = lookup_synonyms(mot_propre)
+                syns = rechercher_synonymes(mot_propre)
                 if syns:
                     syn = syns[0]
                     if mot_propre.istitle():
@@ -30,9 +30,9 @@ class RemplacementSynonymes(Mutation):
 
 
 class TraductionGenerique(Mutation):
-    def __init__(self, target_lang: str = "en"):
+    def __init__(self, langue_cible: str = "en"):
         super().__init__()
-        self.target_lang = target_lang
+        self.langue_cible = langue_cible
 
     def apply(self, chaine: str, proba: float) -> str:
         if not chaine:
@@ -43,10 +43,10 @@ class TraductionGenerique(Mutation):
         for mot in mots:
             mot_propre = mot.strip(".,!?;:")
             if random.random() <= proba:
-                tr = translate_text(mot_propre, self.target_lang)
-                if tr and tr != mot_propre:
+                traduction = traduire_texte(mot_propre, self.langue_cible)
+                if traduction and traduction != mot_propre:
                     suffix = mot[len(mot_propre) :]
-                    nouvelle_liste.append(tr + suffix)
+                    nouvelle_liste.append(traduction + suffix)
                     continue
             nouvelle_liste.append(mot)
         return " ".join(nouvelle_liste)
