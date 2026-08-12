@@ -30,6 +30,11 @@ PROMPTS_DE_FALLBACK = [
 
 
 def appliquer_mutations(chaine: str, liste_mutations, proba: float) -> str:
+    """Applique une liste de mutations sur une chaîne.
+
+    Cette fonction accepte des objets mutation qui exposent `appliquer` ou des
+    fonctions directes. Elle enchaîne les mutations les unes après les autres.
+    """
     resultat = chaine
     for mutation in liste_mutations:
         if hasattr(mutation, "appliquer"):
@@ -40,6 +45,11 @@ def appliquer_mutations(chaine: str, liste_mutations, proba: float) -> str:
 
 
 def main() -> int:
+    """Point d'entrée principal du script.
+
+    Charge les prompts, applique chaque mutation avec plusieurs probabilités,
+    affiche les résultats et sauvegarde les sorties dans un fichier JSON.
+    """
     prompts = charger_prompts(PROJECT_ROOT / "dataset1_of_prompts.json")
     if not prompts:
         prompts = charger_prompts(PROJECT_ROOT / "prompts.json")
