@@ -1,26 +1,12 @@
 import random
 
-try:
-    from PyDictionary import PyDictionary
-except ImportError:
-    PyDictionary = None
-
 from mutation_base import Mutation
-from pydict_wrapper import translate_text
+from pydict_wrapper import lookup_synonyms, translate_text
 
 
 class RemplacementSynonymes(Mutation):
     def __init__(self):
         super().__init__()
-        self._dict = PyDictionary() if PyDictionary is not None else None
-
-    def _lookup_synonyms(self, mot_propre: str):
-        if self._dict is None:
-            return None
-        try:
-            return self._dict.synonym(mot_propre)
-        except Exception:
-            return None
 
     def apply(self, chaine: str, proba: float) -> str:
         if not chaine:
@@ -31,7 +17,7 @@ class RemplacementSynonymes(Mutation):
         for mot in mots:
             mot_propre = mot.strip(".,!?;:")
             if random.random() <= proba:
-                syns = self._lookup_synonyms(mot_propre)
+                syns = lookup_synonyms(mot_propre)
                 if syns:
                     syn = syns[0]
                     if mot_propre.istitle():
