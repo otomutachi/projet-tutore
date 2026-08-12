@@ -13,15 +13,23 @@ import re
 
 try:
     from PyDictionary import PyDictionary
-except Exception:  # ImportError ou erreurs d'initialisation réseau
+except Exception:
     PyDictionary = None
 
 
 _WORD_RE = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ]+")
 
 
+def _apply_case(token: str, traduction: str) -> str:
+    if token.istitle():
+        return traduction.capitalize()
+    if token.isupper():
+        return traduction.upper()
+    return traduction
+
+
 def _translate_token(token: str, dict_client: Optional[object], target_lang: str) -> str:
-    if not dict_client:
+    if dict_client is None:
         return token
     try:
         translated = dict_client.translate(token, target_lang)
@@ -29,25 +37,11 @@ def _translate_token(token: str, dict_client: Optional[object], target_lang: str
         return token
     if not translated:
         return token
-    # Preserve capitalization (Title case)
-    if token.istitle():
-        return translated.capitalize()
-    if token.isupper():
-        return translated.upper()
-    return translated
+    return _apply_case(token, translated)
 
 
 def translate_text(text: str, target_lang: str = "en") -> str:
-    """Translate `text` into `target_lang` using PyDictionary.
-
-    - If PyDictionary is not available or a translation fails, returns the
-      original text unchanged for that token.
-    - The function splits the input preserving punctuation and whitespace.
-    """
-    if PyDictionary is None:
-        return text
-
-    dict_client = PyDictionary()
+    dict_client = PyDictionary() if PyDictionary is not None else None
 
     parts = re.split(r"(" + _WORD_RE.pattern + r")", text)
     translated_parts = []
