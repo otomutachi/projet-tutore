@@ -38,23 +38,67 @@ def _appliquer_casse(mot: str, traduction: str) -> str:
     return traduction
 
 
+def _lang_candidates(langue: str) -> list[str]:
+    """Retourne les codes de langue acceptés par wn pour une langue donnée."""
+    langue = (langue or "").lower()
+    candidats = [langue]
+    mapping = {
+        "en": ["en", "eng"],
+        "eng": ["eng", "en"],
+        "fr": ["fr", "fra"],
+        "fra": ["fra", "fr"],
+    }
+    for item in mapping.get(langue, [langue]):
+        if item not in candidats:
+            candidats.append(item)
+    return candidats
+
+
+def _charger_lexiques_wn() -> None:
+    """Télécharge les lexiques WordNet nécessaires si aucun n'est présent."""
+    if wn is None:
+        return
+    try:
+        lexiques = list(wn.lexicons())
+        if lexiques:
+            return
+    except Exception:
+        pass
+
+    for ressource in ("oewn:2021", "omw-fr:1.4"):
+        try:
+            wn.download(ressource)
+        except Exception:
+            continue
+
+
 def _traduire_mot(mot: str, client_dictionnaire: Optional[object], langue_cible: str) -> str:
     """Traduit un seul mot avec argostranslate."""
     if client_dictionnaire is None:
         return mot
     try:
+        if hasattr(client_dictionnaire, "translate"):
+            callback = client_dictionnaire.translate
+        elif hasattr(client_dictionnaire, "__call__"):
+            callback = client_dictionnaire
+        else:
+            return mot
+
         with _masquer_sortie_pydictionary():
             if langue_cible.lower() == "en":
-                traduit = client_dictionnaire.translate(mot, "fr", "en")
+                traduit = callback(mot, "fr", "en")
             elif langue_cible.lower() == "fr":
-                traduit = client_dictionnaire.translate(mot, "en", "fr")
+                traduit = callback(mot, "en", "fr")
             else:
-                traduit = client_dictionnaire.translate(mot, "fr", langue_cible)
+                traduit = callback(mot, "fr", langue_cible)
     except Exception:
         return mot
-    if not traduit:
+
+    if isinstance(traduit, (list, tuple)):
+        traduit = traduit[0] if traduit else mot
+    if not traduit or not isinstance(traduit, str):
         return mot
-    return _appliquer_casse(mot, traduit)
+    return _appliquer_casse(mot, traduit.strip())
 
 
 def _rechercher_synonymes(mot: str, client_dictionnaire: Optional[object]) -> Optional[list[str]]:
@@ -62,18 +106,23 @@ def _rechercher_synonymes(mot: str, client_dictionnaire: Optional[object]) -> Op
     if client_dictionnaire is None:
         return None
     try:
-        lemmas = client_dictionnaire.lemmas(mot, lang="en")
-        for lemme in lemmas:
-            synset = getattr(lemme, "synset", lambda: None)()
-            if synset is None:
+        _charger_lexiques_wn()
+        synonymes: list[str] = []
+        seen = set()
+        for langue in _lang_candidates("en") + _lang_candidates("fr"):
+            try:
+                for synset in client_dictionnaire.synsets(mot, lang=langue):
+                    for lemme in synset.lemmas():
+                        nom = lemme.name().replace("_", " ")
+                        if not nom or nom.lower() == mot.lower():
+                            continue
+                        if nom.lower() not in seen:
+                            seen.add(nom.lower())
+                            synonymes.append(nom)
+                if synonymes:
+                    return synonymes
+            except Exception:
                 continue
-            synonymes = []
-            for autre in synset.lemmas():
-                nom = autre.name()
-                if nom != mot and nom not in synonymes:
-                    synonymes.append(nom)
-            if synonymes:
-                return synonymes
         return None
     except Exception:
         return None
