@@ -20,6 +20,7 @@ from mutations_syntaxiques import DilutionContexte, PermutationLettres, Permutat
 from helpers import afficher_resultats, charger_prompts, charger_prompts_cve, sauvegarder_prompts
 from pydict_wrapper import traduire_texte
 
+SOURCE_PROMPTS_FILE = PROJECT_ROOT / "dataset1_of_prompts.json"
 PROMPTS_DE_FALLBACK = [
     "Projet tutoré sur les prompts",
     "Chaîne de caractères en entrée",
@@ -47,10 +48,11 @@ def appliquer_mutations(chaine: str, liste_mutations, proba: float) -> str:
 def main() -> int:
     """Point d'entrée principal du script.
 
-    Charge les prompts, applique chaque mutation avec plusieurs probabilités,
-    affiche les résultats et sauvegarde les sorties dans un fichier JSON.
+    Charge les prompts depuis `dataset1_of_prompts.json`, puis applique les
+    mutations. Si le fichier est absent ou invalide, une liste de secours est
+    utilisée.
     """
-    prompts = charger_prompts(PROJECT_ROOT / "dataset1_of_prompts.json")
+    prompts = charger_prompts(SOURCE_PROMPTS_FILE)
     if not prompts:
         prompts = charger_prompts(PROJECT_ROOT / "prompts.json")
     if not prompts:
