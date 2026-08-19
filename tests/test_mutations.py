@@ -16,9 +16,8 @@ from helpers import charger_prompts_cve
 
 class TestMutations(unittest.TestCase):
     def test_synonyme_live_exemple(self):
-        # These tests depend on PyDictionary and internet access; results may vary.
+        # These tests depend on wn and the available lexicons; results may vary.
         entree = "hello"
-        # Manually verify the expected result from PyDictionary before asserting.
         resultat = remplacement_synonymes(entree, 1.0)
         self.assertIsInstance(resultat, str)
 
@@ -48,7 +47,7 @@ class TestMutations(unittest.TestCase):
         self.assertIsInstance(resultat, str)
 
     def test_traduction_generique_exemple(self):
-        # Live translation test using PyDictionary; verify expected value manually.
+        # Live translation test using argostranslate; verify expected value manually.
         entree = "house"
         resultat = traduction_vers(entree, 'es', 1.0)
         self.assertIsInstance(resultat, str)

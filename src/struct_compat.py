@@ -1,10 +1,5 @@
 # Compatibilité avec l'ancien module struct.py
 
-try:
-    from PyDictionary import PyDictionary
-except ImportError:
-    PyDictionary = None
-
 from mutations_orthographiques import (
     AlphabetGrec,
     FauteDeFrappe,

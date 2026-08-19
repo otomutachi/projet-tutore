@@ -9,6 +9,7 @@ from typing import Optional
 import contextlib
 import io
 import re
+import random
 
 try:
     import wn
@@ -22,7 +23,6 @@ except Exception:
 
 
 _REGEX_MOT = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ]+")
-
 
 def _masquer_sortie_pydictionary():
     """Retourne un contexte qui redirige stdout vers un buffer vide."""
@@ -59,17 +59,40 @@ def _charger_lexiques_wn() -> None:
     if wn is None:
         return
     try:
-        lexiques = list(wn.lexicons())
-        if lexiques:
+        lexiques = [lex.id.lower() for lex in wn.lexicons()]
+        if any(item in lexiques for item in ("oewn", "omw-en", "omw-fr")):
             return
     except Exception:
         pass
 
-    for ressource in ("oewn:2021", "omw-fr:1.4"):
+    for ressource in ("oewn:2021", "omw-en:1.4", "omw-fr:1.4"):
         try:
             wn.download(ressource)
         except Exception:
             continue
+
+
+def _traduire_phrase_complete(texte: str, langue_cible: str) -> Optional[str]:
+    """Tente une traduction de la phrase entière via argostranslate."""
+    if not texte or argos_translate is None:
+        return None
+
+    try:
+        source = "fr" if langue_cible.lower() == "en" else "en"
+        callback = getattr(argos_translate, "translate", None)
+        if callback is None or not callable(callback):
+            return None
+
+        with _masquer_sortie_pydictionary():
+            traduit = callback(texte, source, langue_cible.lower())
+
+        if isinstance(traduit, (list, tuple)):
+            traduit = traduit[0] if traduit else None
+        if isinstance(traduit, str) and traduit.strip() and traduit.strip().lower() != texte.strip().lower():
+            return traduit.strip()
+    except Exception:
+        pass
+    return None
 
 
 def _traduire_mot(mot: str, client_dictionnaire: Optional[object], langue_cible: str) -> str:
@@ -109,9 +132,20 @@ def _rechercher_synonymes(mot: str, client_dictionnaire: Optional[object]) -> Op
         _charger_lexiques_wn()
         synonymes: list[str] = []
         seen = set()
-        for langue in _lang_candidates("en") + _lang_candidates("fr"):
+
+        essais = [
+            lambda: client_dictionnaire.synsets(form=mot, lang="en", lexicon="oewn:2021"),
+            lambda: client_dictionnaire.synsets(form=mot, lang="en", lexicon="omw-en:1.4"),
+            lambda: client_dictionnaire.synsets(form=mot, lang="eng", lexicon="oewn:2021"),
+            lambda: client_dictionnaire.synsets(form=mot, lang="eng", lexicon="omw-en:1.4"),
+            lambda: client_dictionnaire.synsets(form=mot),
+            lambda: client_dictionnaire.synsets(form=mot, lang="en"),
+            lambda: client_dictionnaire.synsets(form=mot, lang="fr"),
+            lambda: client_dictionnaire.synsets(form=mot, lang="fra"),
+        ]
+        for appel in essais:
             try:
-                for synset in client_dictionnaire.synsets(mot, lang=langue):
+                for synset in appel():
                     for lemme in synset.lemmas():
                         nom = lemme.name().replace("_", " ")
                         if not nom or nom.lower() == mot.lower():
@@ -123,13 +157,20 @@ def _rechercher_synonymes(mot: str, client_dictionnaire: Optional[object]) -> Op
                     return synonymes
             except Exception:
                 continue
-        return None
+        return synonymes or None
     except Exception:
         return None
 
 
 def traduire_texte(texte: str, langue_cible: str = "en") -> str:
-    """Traduit chaque mot dans une chaîne en utilisant argostranslate."""
+    """Traduit une chaîne; essaye d'abord la phrase complète, puis retombe sur mot par mot."""
+    if not texte:
+        return texte
+
+    phrase_traduite = _traduire_phrase_complete(texte, langue_cible)
+    if phrase_traduite is not None:
+        return phrase_traduite
+
     client_dictionnaire = argos_translate if argos_translate is not None else None
 
     morceaux = re.split(r"(" + _REGEX_MOT.pattern + r")", texte)

@@ -100,6 +100,12 @@ def main() -> int:
                 }
             )
 
+    print("\n=== DEMO SYNONYME FORCÉ ===")
+    exemple = "Projet tutoré sur les prompts"
+    mut_syn = RemplacementSynonymes().appliquer(exemple, 1.0)
+    print("Original :", exemple)
+    print("Muté     :", mut_syn)
+
     sauvegarder_prompts(resultats, PROJECT_ROOT / "resultats.json")
 
     cve_prompts = charger_prompts_cve(PROJECT_ROOT / "prompts_cve.json")
@@ -121,15 +127,14 @@ def main() -> int:
     print("Résultats sauvegardés dans 'resultats.json'")
     print("=" * 60)
 
-    # Démonstration simple de la fonction de traduction PyDictionary
+    # Démonstration simple de la fonction de traduction via argostranslate
     try:
         exemple = "voiture rapide et sécurisée"
         trad = traduire_texte(exemple, "en")
-        print("\n=== DEMO TRADUCTION PYDICTIONARY ===")
+        print("\n=== DEMO TRADUCTION ARGOS ===")
         print("Original :", exemple)
         print("Traduction (en) :", trad)
     except Exception:
-        # Ne pas faire échouer le script si PyDictionary n'est pas disponible
         pass
 
     return 0

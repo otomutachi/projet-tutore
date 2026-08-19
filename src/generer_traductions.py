@@ -3,10 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-try:
-    from PyDictionary import PyDictionary
-except ImportError:
-    PyDictionary = None
+from argostranslate import translate as argos_translate
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SORTIE = PROJECT_ROOT / "data" / "traduction.json"
@@ -38,14 +35,10 @@ TERMES = [
 
 
 def generer_traductions() -> dict[str, str]:
-    if PyDictionary is None:
-        raise RuntimeError("PyDictionary n'est pas installé.")
-
-    traducteur = PyDictionary()
     resultats: dict[str, str] = {}
     for terme in TERMES:
         try:
-            traduction = traducteur.translate(terme, "en")
+            traduction = argos_translate.translate(terme, "fr", "en")
         except Exception:
             traduction = None
         if isinstance(traduction, str) and traduction:

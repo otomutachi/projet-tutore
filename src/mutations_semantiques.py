@@ -5,7 +5,7 @@ from pydict_wrapper import rechercher_synonymes, traduire_texte
 
 
 class RemplacementSynonymes(Mutation):
-    """Mutation qui remplace certains mots par un synonyme live PyDictionary."""
+    """Mutation qui remplace certains mots par un synonyme via wn."""
 
     def __init__(self):
         super().__init__()
@@ -14,8 +14,8 @@ class RemplacementSynonymes(Mutation):
         """Applique une substitution de synonymes sur chaque mot de la chaîne.
 
         Pour chaque mot, la probabilité `proba` détermine si on tente de chercher
-        un synonyme. Si PyDictionary retourne une liste valide, on prend le premier
-        synonyme et on conserve la ponctuation finale.
+        un synonyme. Si la liste est valide, on choisit un synonyme au hasard pour
+        faire varier les résultats d'un run à l'autre.
         """
         if not chaine:
             return chaine
@@ -24,10 +24,10 @@ class RemplacementSynonymes(Mutation):
         nouvelle_liste = []
         for mot in mots:
             mot_propre = mot.strip(".,!?;:")
-            if random.random() <= proba:
+            if random.random() <= proba and mot_propre:
                 syns = rechercher_synonymes(mot_propre)
                 if syns:
-                    syn = syns[0]
+                    syn = random.choice(syns)
                     if mot_propre.istitle():
                         syn = syn.capitalize()
                     suffix = mot[len(mot_propre) :]
@@ -38,7 +38,7 @@ class RemplacementSynonymes(Mutation):
 
 
 class TraductionGenerique(Mutation):
-    """Mutation qui traduit certains mots en utilisant PyDictionary."""
+    """Mutation qui traduit certains mots via argostranslate."""
 
     def __init__(self, langue_cible: str = "en"):
         super().__init__()
@@ -57,7 +57,7 @@ class TraductionGenerique(Mutation):
         nouvelle_liste = []
         for mot in mots:
             mot_propre = mot.strip(".,!?;:")
-            if random.random() <= proba:
+            if random.random() <= proba and mot_propre:
                 traduction = traduire_texte(mot_propre, self.langue_cible)
                 if traduction and traduction != mot_propre:
                     suffix = mot[len(mot_propre) :]
