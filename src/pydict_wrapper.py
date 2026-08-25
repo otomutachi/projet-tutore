@@ -21,6 +21,11 @@ try:
 except Exception:
     argos_translate = None
 
+try:
+    from argostranslate import package as argos_package
+except Exception:
+    argos_package = None
+
 
 _REGEX_MOT = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ]+")
 
@@ -60,16 +65,53 @@ def _charger_lexiques_wn() -> None:
         return
     try:
         lexiques = [lex.id.lower() for lex in wn.lexicons()]
-        if any(item in lexiques for item in ("oewn", "omw-en", "omw-fr")):
+    except Exception:
+        pass
+        lexiques = []
+
+    for ressource in ("oewn:2021", "omw-en:1.4", "omw-fr:1.4"):
+        identifiant = ressource.split(":", 1)[0].lower()
+        if identifiant in lexiques:
+            continue
+        try:
+            with _masquer_sortie_pydictionary():
+                wn.download(ressource)
+        except Exception:
+            continue
+
+
+def _installer_modele_argos(source: str, cible: str) -> None:
+    """Installe le modèle Argos fr-en ou en-fr s'il est absent."""
+    if argos_translate is None or argos_package is None:
+        return
+
+    source = source.lower()
+    cible = cible.lower()
+    if (source, cible) not in (("fr", "en"), ("en", "fr")):
+        return
+
+    try:
+        langues = argos_translate.get_installed_languages()
+        langue_source = next(langue for langue in langues if langue.code == source)
+        langue_cible = next(langue for langue in langues if langue.code == cible)
+        if langue_source.get_translation(langue_cible) is not None:
             return
     except Exception:
         pass
 
-    for ressource in ("oewn:2021", "omw-en:1.4", "omw-fr:1.4"):
-        try:
-            wn.download(ressource)
-        except Exception:
-            continue
+    try:
+        with _masquer_sortie_pydictionary():
+            argos_package.update_package_index()
+            paquets = argos_package.get_available_packages()
+            paquet = next(
+                paquet
+                for paquet in paquets
+                if paquet.from_code == source and paquet.to_code == cible
+            )
+            chemin = paquet.download()
+            argos_package.install_from_path(chemin)
+    except Exception:
+        pass
 
 
 def _traduire_phrase_complete(texte: str, langue_cible: str) -> Optional[str]:
@@ -147,7 +189,8 @@ def _rechercher_synonymes(mot: str, client_dictionnaire: Optional[object]) -> Op
             try:
                 for synset in appel():
                     for lemme in synset.lemmas():
-                        nom = lemme.name().replace("_", " ")
+                        nom = lemme if isinstance(lemme, str) else lemme.name()
+                        nom = nom.replace("_", " ")
                         if not nom or nom.lower() == mot.lower():
                             continue
                         if nom.lower() not in seen:
@@ -166,6 +209,9 @@ def traduire_texte(texte: str, langue_cible: str = "en") -> str:
     """Traduit une chaîne; essaye d'abord la phrase complète, puis retombe sur mot par mot."""
     if not texte:
         return texte
+
+    source = "fr" if langue_cible.lower() == "en" else "en"
+    _installer_modele_argos(source, langue_cible)
 
     phrase_traduite = _traduire_phrase_complete(texte, langue_cible)
     if phrase_traduite is not None:
