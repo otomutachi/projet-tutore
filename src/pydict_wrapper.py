@@ -64,14 +64,13 @@ def _charger_lexiques_wn() -> None:
     if wn is None:
         return
     try:
-        lexiques = [lex.id.lower() for lex in wn.lexicons()]
+        lexiques = {lex.id.lower() for lex in wn.lexicons()}
     except Exception:
         pass
         lexiques = []
 
     for ressource in ("oewn:2021", "omw-en:1.4", "omw-fr:1.4"):
-        identifiant = ressource.split(":", 1)[0].lower()
-        if identifiant in lexiques:
+        if ressource.lower() in lexiques:
             continue
         try:
             with _masquer_sortie_pydictionary():
