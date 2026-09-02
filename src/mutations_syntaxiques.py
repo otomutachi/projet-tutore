@@ -94,33 +94,12 @@ def _nettoyer_espaces(texte: str) -> str:
     return texte
 
 
-def mutation_erreur_frappe(texte: str) -> str:
-    """Simule une faute de frappe légère sans changer le sens."""
-    if not texte:
-        return texte
-
-    mots = texte.split()
-    if len(mots) <= 1:
-        return texte
-
-    nb = min(2, len(mots))
-    for index in random.sample(range(len(mots)), nb):
-        mot = mots[index]
-        if len(mot) <= 3:
-            continue
-        pos = random.randint(1, len(mot) - 2)
-        chars = list(mot)
-        chars[pos], chars[pos + 1] = chars[pos + 1], chars[pos]
-        mots[index] = "".join(chars)
-
-    return _nettoyer_espaces(" ".join(mots))
-
-
-def mutation_argumentaire(texte: str) -> str:
+def mutation_argumentaire(texte: str, proba: float = 0.5) -> str:
     """Reformule la demande comme un besoin / argumentaire."""
     if not texte:
         return texte
 
+    _ = proba
     phrase = _nettoyer_espaces(texte).rstrip("?!.")
     phrase = phrase.replace("écris", "j'ai besoin de")
     phrase = phrase.replace("écrit", "j'ai besoin de")
@@ -138,11 +117,12 @@ def mutation_argumentaire(texte: str) -> str:
     return _nettoyer_espaces(phrase)
 
 
-def mutation_structure_inversee(texte: str) -> str:
+def mutation_structure_inversee(texte: str, proba: float = 0.5) -> str:
     """Inverse un peu la structure, tout en restant compréhensible."""
     if not texte:
         return texte
 
+    _ = proba
     phrase = _nettoyer_espaces(texte).rstrip("?!.")
     mots = phrase.split()
 
@@ -156,39 +136,36 @@ def mutation_structure_inversee(texte: str) -> str:
     return f"{phrase}, comme ça tu vois ?"
 
 
-def mutation_aleatoire(texte: str, liste=None) -> str:
+def mutation_aleatoire(texte: str, liste=None, proba: float = 0.5) -> str:
     """Applique une mutation simple au hasard."""
     if not texte:
         return texte
 
     choix = liste or [
-        "mutation_erreur_frappe",
         "mutation_argumentaire",
         "mutation_structure_inversee",
     ]
     nom = random.choice(choix)
-    return appliquer_mutations(texte, [nom])
+    return appliquer_mutations(texte, [nom], proba)
 
 
-def appliquer_mutations(texte: str, liste=None) -> str:
+def appliquer_mutations(texte: str, liste=None, proba: float = 0.5) -> str:
     """Applique une mutation ou une liste de mutations, dans l'ordre."""
     if not texte:
         return texte
 
     if liste is None:
-        return mutation_aleatoire(texte)
+        return mutation_aleatoire(texte, proba=proba)
 
     if isinstance(liste, str):
         liste = [liste]
 
     resultat = texte
     for nom in liste:
-        if nom == "mutation_erreur_frappe":
-            resultat = mutation_erreur_frappe(resultat)
-        elif nom == "mutation_argumentaire":
-            resultat = mutation_argumentaire(resultat)
+        if nom == "mutation_argumentaire":
+            resultat = mutation_argumentaire(resultat, proba)
         elif nom == "mutation_structure_inversee":
-            resultat = mutation_structure_inversee(resultat)
+            resultat = mutation_structure_inversee(resultat, proba)
         elif nom == "mutation_aleatoire":
-            resultat = mutation_aleatoire(resultat)
+            resultat = mutation_aleatoire(resultat, proba=proba)
     return resultat

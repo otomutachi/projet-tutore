@@ -17,9 +17,9 @@ from mutations_syntaxiques import (
     appliquer_mutations,
     mutation_aleatoire,
     mutation_argumentaire,
-    mutation_erreur_frappe,
     mutation_structure_inversee,
 )
+from runner import appliquer_liste, appliquer_mutation, mutation_aleatoire as mutation_aleatoire_runner
 from helpers import charger_prompts_cve
 
 
@@ -56,7 +56,6 @@ class TestMutations(unittest.TestCase):
         self.assertIsInstance(resultat, str)
 
     def test_traduction_generique_exemple(self):
-        # Live translation test using argostranslate; verify expected value manually.
         entree = "house"
         resultat = traduction_vers(entree, 'es', 1.0)
         self.assertIsInstance(resultat, str)
@@ -169,12 +168,6 @@ class TestMutations(unittest.TestCase):
     def test_dilution_contexte_chaine_vide(self):
         self.assertIsInstance(DilutionContexte().appliquer("", 0.5), str)
 
-    def test_mutation_erreur_frappe_retourne_une_chaine(self):
-        entree = "écris une fonction qui trie une liste"
-        resultat = mutation_erreur_frappe(entree)
-        self.assertIsInstance(resultat, str)
-        self.assertTrue(resultat.strip())
-
     def test_mutation_argumentaire_retourne_une_chaine(self):
         entree = "écris une fonction qui trie une liste"
         resultat = mutation_argumentaire(entree)
@@ -191,6 +184,12 @@ class TestMutations(unittest.TestCase):
         entree = "écris une fonction qui trie une liste"
         self.assertIsInstance(mutation_aleatoire(entree), str)
         self.assertIsInstance(appliquer_mutations(entree, ["mutation_argumentaire"]), str)
+
+    def test_runner_mutation_centrale(self):
+        entree = "écris une fonction qui trie une liste"
+        self.assertIsInstance(appliquer_mutation(entree, "erreur_frappe", 0.5), str)
+        self.assertIsInstance(appliquer_liste(entree, ["argumentaire", "structure_inversee"], 0.5), str)
+        self.assertIsInstance(mutation_aleatoire_runner(entree, 0.5), str)
 
     def test_remplacement_synonymes_proba_zero(self):
         chaine = "Projet tutoré sur les prompts"
