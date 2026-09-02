@@ -85,3 +85,110 @@ def permutation_mots(chaine: str, proba: float) -> str:
 
 def dilution_contexte(chaine: str, proba: float) -> str:
     return DilutionContexte().appliquer(chaine, proba)
+
+
+def _nettoyer_espaces(texte: str) -> str:
+    """Petit coup de polish sur les espaces et la ponctuation."""
+    texte = texte.strip()
+    texte = texte.replace("  ", " ")
+    return texte
+
+
+def mutation_erreur_frappe(texte: str) -> str:
+    """Simule une faute de frappe légère sans changer le sens."""
+    if not texte:
+        return texte
+
+    mots = texte.split()
+    if len(mots) <= 1:
+        return texte
+
+    nb = min(2, len(mots))
+    for index in random.sample(range(len(mots)), nb):
+        mot = mots[index]
+        if len(mot) <= 3:
+            continue
+        pos = random.randint(1, len(mot) - 2)
+        chars = list(mot)
+        chars[pos], chars[pos + 1] = chars[pos + 1], chars[pos]
+        mots[index] = "".join(chars)
+
+    return _nettoyer_espaces(" ".join(mots))
+
+
+def mutation_argumentaire(texte: str) -> str:
+    """Reformule la demande comme un besoin / argumentaire."""
+    if not texte:
+        return texte
+
+    phrase = _nettoyer_espaces(texte).rstrip("?!.")
+    phrase = phrase.replace("écris", "j'ai besoin de")
+    phrase = phrase.replace("écrit", "j'ai besoin de")
+    phrase = phrase.replace("crée", "je veux")
+    phrase = phrase.replace("créer", "faire")
+
+    if "j'ai besoin de" not in phrase.lower():
+        phrase = f"j'ai besoin de {phrase}"
+
+    if "tu peux" not in phrase.lower() and "peux" not in phrase.lower():
+        phrase = f"{phrase}, tu peux faire ça ?"
+    else:
+        phrase = f"{phrase} ?"
+
+    return _nettoyer_espaces(phrase)
+
+
+def mutation_structure_inversee(texte: str) -> str:
+    """Inverse un peu la structure, tout en restant compréhensible."""
+    if not texte:
+        return texte
+
+    phrase = _nettoyer_espaces(texte).rstrip("?!.")
+    mots = phrase.split()
+
+    if len(mots) > 4 and " qui " in phrase.lower():
+        partie1, partie2 = phrase.split(" qui ", 1)
+        return f"{partie2}, {partie1} ?"
+
+    if len(mots) > 4:
+        return f"{ ' '.join(mots[2:]) }, { ' '.join(mots[:2])} ?"
+
+    return f"{phrase}, comme ça tu vois ?"
+
+
+def mutation_aleatoire(texte: str, liste=None) -> str:
+    """Applique une mutation simple au hasard."""
+    if not texte:
+        return texte
+
+    choix = liste or [
+        "mutation_erreur_frappe",
+        "mutation_argumentaire",
+        "mutation_structure_inversee",
+    ]
+    nom = random.choice(choix)
+    return appliquer_mutations(texte, [nom])
+
+
+def appliquer_mutations(texte: str, liste=None) -> str:
+    """Applique une mutation ou une liste de mutations, dans l'ordre."""
+    if not texte:
+        return texte
+
+    if liste is None:
+        return mutation_aleatoire(texte)
+
+    if isinstance(liste, str):
+        liste = [liste]
+
+    resultat = texte
+    for nom in liste:
+        if nom == "mutation_erreur_frappe":
+            resultat = mutation_erreur_frappe(resultat)
+        elif nom == "mutation_argumentaire":
+            resultat = mutation_argumentaire(resultat)
+        elif nom == "mutation_structure_inversee":
+            resultat = mutation_structure_inversee(resultat)
+        elif nom == "mutation_aleatoire":
+            resultat = mutation_aleatoire(resultat)
+    return resultat

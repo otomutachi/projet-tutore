@@ -10,7 +10,16 @@ if str(SRC_DIR) not in sys.path:
 
 from mutations_orthographiques import AlphabetGrec, FauteDeFrappe, RemplacementAccents, RemplacementEPar3
 from mutations_semantiques import RemplacementSynonymes, remplacement_synonymes, traduction_vers, traduction_anglais
-from mutations_syntaxiques import DilutionContexte, PermutationLettres, PermutationMots
+from mutations_syntaxiques import (
+    DilutionContexte,
+    PermutationLettres,
+    PermutationMots,
+    appliquer_mutations,
+    mutation_aleatoire,
+    mutation_argumentaire,
+    mutation_erreur_frappe,
+    mutation_structure_inversee,
+)
 from helpers import charger_prompts_cve
 
 
@@ -159,6 +168,29 @@ class TestMutations(unittest.TestCase):
 
     def test_dilution_contexte_chaine_vide(self):
         self.assertIsInstance(DilutionContexte().appliquer("", 0.5), str)
+
+    def test_mutation_erreur_frappe_retourne_une_chaine(self):
+        entree = "écris une fonction qui trie une liste"
+        resultat = mutation_erreur_frappe(entree)
+        self.assertIsInstance(resultat, str)
+        self.assertTrue(resultat.strip())
+
+    def test_mutation_argumentaire_retourne_une_chaine(self):
+        entree = "écris une fonction qui trie une liste"
+        resultat = mutation_argumentaire(entree)
+        self.assertIsInstance(resultat, str)
+        self.assertTrue(resultat.strip())
+
+    def test_mutation_structure_inversee_retourne_une_chaine(self):
+        entree = "écris une fonction qui trie une liste"
+        resultat = mutation_structure_inversee(entree)
+        self.assertIsInstance(resultat, str)
+        self.assertTrue(resultat.strip())
+
+    def test_mutation_aleatoire_et_appliquer_mutations(self):
+        entree = "écris une fonction qui trie une liste"
+        self.assertIsInstance(mutation_aleatoire(entree), str)
+        self.assertIsInstance(appliquer_mutations(entree, ["mutation_argumentaire"]), str)
 
     def test_remplacement_synonymes_proba_zero(self):
         chaine = "Projet tutoré sur les prompts"
