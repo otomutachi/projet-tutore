@@ -11,10 +11,10 @@ class RemplacementEPar3(Mutation):
         nouvelle_chaine = ""
         remplacements = 0
         for caractere in chaine:
-            if caractere == "e" and random.random() <= proba:
+            if caractere == "e" and random.random() < proba:
                 nouvelle_chaine += "3"
                 remplacements += 1
-            elif caractere == "E" and random.random() <= proba:
+            elif caractere == "E" and random.random() < proba:
                 nouvelle_chaine += "3"
                 remplacements += 1
             else:
@@ -42,7 +42,7 @@ class RemplacementAccents(Mutation):
         nouvelle_chaine = ""
         remplacements = 0
         for caractere in chaine:
-            if caractere in self.remplacement and random.random() <= proba:
+            if caractere in self.remplacement and random.random() < proba:
                 nouvelle_chaine += self.remplacement[caractere]
                 remplacements += 1
             else:
@@ -77,7 +77,7 @@ class FauteDeFrappe(Mutation):
         nouvelle_chaine = ""
         for caractere in chaine:
             remplacement = self.voisinage.get(caractere)
-            if remplacement is not None and random.random() <= proba:
+            if remplacement is not None and random.random() < proba:
                 nouvelle_chaine += remplacement
             else:
                 nouvelle_chaine += caractere
@@ -105,7 +105,7 @@ class AlphabetGrec(Mutation):
         nouvelle_chaine = ""
         for caractere in chaine:
             remplacement = self.remplacement.get(caractere.lower())
-            if remplacement is not None and random.random() <= proba:
+            if remplacement is not None and random.random() < proba:
                 if caractere.isupper():
                     nouvelle_chaine += remplacement.upper()
                 else:

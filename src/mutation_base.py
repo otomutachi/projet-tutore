@@ -12,7 +12,7 @@ class Mutation:
             return chaine
         nouvelle_chaine = []
         for caractere in chaine:
-            if caractere in mapping and random.random() <= proba:
+            if caractere in mapping and random.random() < proba:
                 nouvelle_chaine.append(mapping[caractere])
             else:
                 nouvelle_chaine.append(caractere)
@@ -24,7 +24,7 @@ class Mutation:
         nouvelle_chaine = []
         for caractere in chaine:
             remplacement = mapping.get(caractere.lower())
-            if remplacement is not None and random.random() <= proba:
+            if remplacement is not None and random.random() < proba:
                 nouvelle_chaine.append(remplacement.upper() if caractere.isupper() else remplacement)
             else:
                 nouvelle_chaine.append(caractere)

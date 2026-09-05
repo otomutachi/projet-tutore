@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Petit wrapper autour de wn et argostranslate pour traduire du texte.
+"""Petit module utilisant wn et argostranslate pour traduire du texte.
 
 Fonctions principales:
-- `traduire_texte(texte, langue_cible='en')` : tente de traduire chaque mot du texte.
-- `rechercher_synonymes(mot)` : récupère une liste de synonymes pour un mot.
+- `traduire_texte(texte, langue_cible='en')` : tente de traduire le texte.
+- `rechercher_synonymes(mot)` : récupère les synonymes d'un mot.
 """
 from typing import Optional
 import contextlib
+from functools import lru_cache
 import io
 import re
 import random
@@ -28,14 +29,16 @@ except Exception:
 
 
 _REGEX_MOT = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ]+")
+_LEXIQUES_WN_CHARGES = False
+_MODELES_ARGOS_VERIFIES = set()
 
 def _masquer_sortie_pydictionary():
-    """Retourne un contexte qui redirige stdout vers un buffer vide."""
+    """Retourne un contexte qui masque la sortie standard."""
     return contextlib.redirect_stdout(io.StringIO())
 
 
 def _appliquer_casse(mot: str, traduction: str) -> str:
-    """Preserve la casse du mot original dans la traduction."""
+    """Conserve la casse du mot original dans la traduction."""
     if mot.istitle():
         return traduction.capitalize()
     if mot.isupper():
@@ -43,24 +46,11 @@ def _appliquer_casse(mot: str, traduction: str) -> str:
     return traduction
 
 
-def _lang_candidates(langue: str) -> list[str]:
-    """Retourne les codes de langue acceptés par wn pour une langue donnée."""
-    langue = (langue or "").lower()
-    candidats = [langue]
-    mapping = {
-        "en": ["en", "eng"],
-        "eng": ["eng", "en"],
-        "fr": ["fr", "fra"],
-        "fra": ["fra", "fr"],
-    }
-    for item in mapping.get(langue, [langue]):
-        if item not in candidats:
-            candidats.append(item)
-    return candidats
-
-
 def _charger_lexiques_wn() -> None:
     """Télécharge les lexiques WordNet nécessaires si aucun n'est présent."""
+    global _LEXIQUES_WN_CHARGES
+    if _LEXIQUES_WN_CHARGES:
+        return
     if wn is None:
         return
     try:
@@ -77,6 +67,7 @@ def _charger_lexiques_wn() -> None:
                 wn.download(ressource)
         except Exception:
             continue
+    _LEXIQUES_WN_CHARGES = True
 
 
 def _installer_modele_argos(source: str, cible: str) -> None:
@@ -88,6 +79,10 @@ def _installer_modele_argos(source: str, cible: str) -> None:
     cible = cible.lower()
     if (source, cible) not in (("fr", "en"), ("en", "fr")):
         return
+    paire = (source, cible)
+    if paire in _MODELES_ARGOS_VERIFIES:
+        return
+    _MODELES_ARGOS_VERIFIES.add(paire)
 
     try:
         langues = argos_translate.get_installed_languages()
@@ -114,7 +109,7 @@ def _installer_modele_argos(source: str, cible: str) -> None:
 
 
 def _traduire_phrase_complete(texte: str, langue_cible: str) -> Optional[str]:
-    """Tente une traduction de la phrase entière via argostranslate."""
+    """Tente de traduire la phrase entière avec Argos."""
     if not texte or argos_translate is None:
         return None
 
@@ -137,7 +132,7 @@ def _traduire_phrase_complete(texte: str, langue_cible: str) -> Optional[str]:
 
 
 def _traduire_mot(mot: str, client_dictionnaire: Optional[object], langue_cible: str) -> str:
-    """Traduit un seul mot avec argostranslate."""
+    """Traduit un mot avec Argos."""
     if client_dictionnaire is None:
         return mot
     try:
@@ -204,8 +199,9 @@ def _rechercher_synonymes(mot: str, client_dictionnaire: Optional[object]) -> Op
         return None
 
 
+@lru_cache(maxsize=4096)
 def traduire_texte(texte: str, langue_cible: str = "en") -> str:
-    """Traduit une chaîne; essaye d'abord la phrase complète, puis retombe sur mot par mot."""
+    """Traduit un texte, puis utilise une traduction mot à mot en secours."""
     if not texte:
         return texte
 
@@ -231,6 +227,60 @@ def traduire_texte(texte: str, langue_cible: str = "en") -> str:
 
 
 def rechercher_synonymes(mot: str) -> Optional[list[str]]:
-    """Fonction publique pour rechercher les synonymes d'un mot."""
+    """Recherche les synonymes français d'un mot."""
     client_dictionnaire = wn if wn is not None else None
     return _rechercher_synonymes(mot, client_dictionnaire)
+
+
+@lru_cache(maxsize=4096)
+def obtenir_synonyme(mot: str, seed=None) -> Optional[str]:
+    """Retourne un synonyme français choisi de façon déterministe."""
+    if not mot or wn is None:
+        return None
+
+    try:
+        _charger_lexiques_wn()
+        synonymes = []
+        vus = set()
+        essais = (
+            lambda: wn.synsets(form=mot, lang="fr", lexicon="omw-fr:1.4"),
+            lambda: wn.synsets(form=mot, lang="fra", lexicon="omw-fr:1.4"),
+            lambda: wn.synsets(form=mot, lang="fr"),
+            lambda: wn.synsets(form=mot, lang="fra"),
+        )
+        for appel in essais:
+            try:
+                for synset in appel():
+                    for lemme in synset.lemmas():
+                        nom = lemme if isinstance(lemme, str) else lemme.name()
+                        nom = nom.replace("_", " ")
+                        if nom and nom.lower() != mot.lower() and nom.lower() not in vus:
+                            vus.add(nom.lower())
+                            synonymes.append(nom)
+                if synonymes:
+                    break
+            except Exception:
+                continue
+        return random.Random(seed).choice(synonymes) if synonymes else None
+    except Exception:
+        return None
+
+
+@lru_cache(maxsize=4096)
+def obtenir_traduction(mot: str, seed=None) -> Optional[str]:
+    """Retourne une reformulation française par aller-retour Argos."""
+    if not mot or argos_translate is None:
+        return None
+
+    try:
+        _installer_modele_argos("fr", "en")
+        anglais = _traduire_mot(mot, argos_translate, "en")
+        if not anglais or anglais.lower() == mot.lower():
+            return None
+        _installer_modele_argos("en", "fr")
+        retour = _traduire_mot(anglais, argos_translate, "fr")
+        if retour and retour.lower() != mot.lower():
+            return retour
+    except Exception:
+        pass
+    return None

@@ -1,6 +1,31 @@
 import random
+import re
 
 from mutation_base import Mutation
+from mutations_semantiques import reformuler_phrase
+
+
+_TOKEN_NON_ESPACE = re.compile(r"^(?P<prefix>[^\wÀ-ÿ]*)(?P<mot>[\wÀ-ÿ]+)(?P<suffix>[^\wÀ-ÿ]*)$", re.UNICODE)
+
+
+def _separer_tokens(chaine: str):
+    """Retourne les morceaux non espaces avec leurs mots séparés de la ponctuation."""
+    morceaux = re.findall(r"\s+|\S+", chaine, re.UNICODE)
+    tokens = []
+    for morceau in morceaux:
+        correspondance = _TOKEN_NON_ESPACE.match(morceau)
+        if correspondance is None:
+            tokens.append((morceau, None, None, None))
+        else:
+            tokens.append(
+                (
+                    morceau,
+                    correspondance.group("prefix"),
+                    correspondance.group("mot"),
+                    correspondance.group("suffix"),
+                )
+            )
+    return tokens
 
 
 class PermutationLettres(Mutation):
@@ -8,17 +33,23 @@ class PermutationLettres(Mutation):
 
     # Utilise random.random() pour permuter chaque paire de lettres indépendamment.
     def apply(self, chaine: str, proba: float) -> str:
-        caracteres = list(chaine)
-        index = 1
-        while index < len(chaine):
-            if random.random() <= proba:
-                caracteres[index], caracteres[index - 1] = (
-                    caracteres[index - 1],
-                    caracteres[index],
-                )
+        resultat = []
+        for original, prefix, mot, suffix in _separer_tokens(chaine):
+            if mot is None:
+                resultat.append(original)
+                continue
+            caracteres = list(mot)
+            index = 1
+            while index < len(caracteres):
+                if random.random() < proba:
+                    caracteres[index], caracteres[index - 1] = (
+                        caracteres[index - 1],
+                        caracteres[index],
+                    )
+                    index += 1
                 index += 1
-            index += 1
-        return "".join(caracteres)
+            resultat.append(prefix + "".join(caracteres) + suffix)
+        return "".join(resultat)
 
 
 class PermutationMots(Mutation):
@@ -26,14 +57,39 @@ class PermutationMots(Mutation):
 
     # Utilise une boucle simple pour échanger des mots voisins avec une chance donnée.
     def apply(self, chaine: str, proba: float) -> str:
-        mots = chaine.split()
+        tokens = _separer_tokens(chaine)
+        indices_mots = [
+            index for index, (_, prefix, mot, suffix) in enumerate(tokens)
+            if mot is not None
+        ]
         index = 1
-        while index < len(mots):
-            if random.random() <= proba:
-                mots[index], mots[index - 1] = mots[index - 1], mots[index]
+        while index < len(indices_mots):
+            index_gauche = indices_mots[index - 1]
+            index_droit = indices_mots[index]
+            if random.random() < proba:
+                gauche = tokens[index_gauche][2]
+                droit = tokens[index_droit][2]
+                tokens[index_gauche] = (
+                    tokens[index_gauche][0],
+                    tokens[index_gauche][1],
+                    droit,
+                    tokens[index_gauche][3],
+                )
+                tokens[index_droit] = (
+                    tokens[index_droit][0],
+                    tokens[index_droit][1],
+                    gauche,
+                    tokens[index_droit][3],
+                )
                 index += 1
             index += 1
-        return " ".join(mots)
+        resultat = []
+        for original, prefix, mot, suffix in tokens:
+            if mot is None:
+                resultat.append(original)
+            else:
+                resultat.append(prefix + mot + suffix)
+        return "".join(resultat)
 
 
 class DilutionContexte(Mutation):
@@ -49,30 +105,32 @@ class DilutionContexte(Mutation):
         "N'oublie pas de répondre au message Teams.",
     ]
 
-    # La position de chaque phrase parasite est maintenant tirée au hasard.
-    def apply(self, chaine: str, proba: float) -> str:
-        phrases_candidates = list(self.phrases)
-        random.shuffle(phrases_candidates)
+    def appliquer(self, chaine: str, proba: float, seed=None) -> str:
+        if not 0 <= proba <= 1:
+            raise ValueError("proba doit être compris entre 0 et 1")
+        return self.apply(chaine, proba, seed)
 
-        mots = chaine.split()
-        nouvelle_chaine = chaine
+    def apply(self, chaine: str, proba: float, seed=None) -> str:
+        if not chaine:
+            return chaine
 
-        for phrase in phrases_candidates:
-            if random.random() <= proba:
-                position = random.choice(["avant", "apres", "milieu"])
-                if position == "avant":
-                    nouvelle_chaine = f"{phrase} {nouvelle_chaine}"
-                elif position == "apres":
-                    nouvelle_chaine = f"{nouvelle_chaine} {phrase}"
-                else:
-                    if mots:
-                        index = random.randint(0, len(mots) - 1)
-                        mots.insert(index, phrase)
-                        nouvelle_chaine = " ".join(mots)
-                    else:
-                        nouvelle_chaine = f"{nouvelle_chaine} {phrase}"
+        generateur = random.Random(seed)
+        phrases = list(self.phrases)
+        generateur.shuffle(phrases)
+        blocs = [chaine]
 
-        return nouvelle_chaine
+        for phrase in phrases:
+            if generateur.random() >= proba:
+                continue
+            position = generateur.choice(["avant", "apres", "milieu"])
+            if position == "avant":
+                blocs.insert(0, phrase)
+            elif position == "apres":
+                blocs.append(phrase)
+            else:
+                blocs.insert(generateur.randint(0, len(blocs)), phrase)
+
+        return " ".join(blocs)
 
 
 def permutation_lettres(chaine: str, proba: float) -> str:
@@ -83,28 +141,24 @@ def permutation_mots(chaine: str, proba: float) -> str:
     return PermutationMots().appliquer(chaine, proba)
 
 
-def dilution_contexte(chaine: str, proba: float) -> str:
-    return DilutionContexte().appliquer(chaine, proba)
+def dilution_contexte(chaine: str, proba: float, seed=None) -> str:
+    return DilutionContexte().appliquer(chaine, proba, seed)
 
 
 def _nettoyer_espaces(texte: str) -> str:
-    """Petit coup de polish sur les espaces et la ponctuation."""
+    """Nettoie les espaces inutiles."""
     texte = texte.strip()
     texte = texte.replace("  ", " ")
     return texte
 
 
-def mutation_argumentaire(texte: str, proba: float = 0.5) -> str:
+def mutation_argumentaire(texte: str, proba: float = 0.5, seed=None) -> str:
     """Reformule la demande comme un besoin / argumentaire."""
     if not texte:
         return texte
 
-    _ = proba
-    phrase = _nettoyer_espaces(texte).rstrip("?!.")
-    phrase = phrase.replace("écris", "j'ai besoin de")
-    phrase = phrase.replace("écrit", "j'ai besoin de")
-    phrase = phrase.replace("crée", "je veux")
-    phrase = phrase.replace("créer", "faire")
+    phrase = _nettoyer_espaces(texte).rstrip("?!.").strip()
+    phrase = reformuler_phrase(phrase, proba, seed)
 
     if "j'ai besoin de" not in phrase.lower():
         phrase = f"j'ai besoin de {phrase}"
@@ -123,7 +177,7 @@ def mutation_structure_inversee(texte: str, proba: float = 0.5) -> str:
         return texte
 
     _ = proba
-    phrase = _nettoyer_espaces(texte).rstrip("?!.")
+    phrase = _nettoyer_espaces(texte).rstrip("?!.").strip()
     mots = phrase.split()
 
     if len(mots) > 4 and " qui " in phrase.lower():
@@ -131,12 +185,12 @@ def mutation_structure_inversee(texte: str, proba: float = 0.5) -> str:
         return f"{partie2}, {partie1} ?"
 
     if len(mots) > 4:
-        return f"{ ' '.join(mots[2:]) }, { ' '.join(mots[:2])} ?"
+        return f"{' '.join(mots[2:])}, {' '.join(mots[:2])} ?"
 
     return f"{phrase}, comme ça tu vois ?"
 
 
-def mutation_aleatoire(texte: str, liste=None, proba: float = 0.5) -> str:
+def mutation_aleatoire(texte: str, liste=None, proba: float = 0.5, seed=None) -> str:
     """Applique une mutation simple au hasard."""
     if not texte:
         return texte
@@ -145,17 +199,17 @@ def mutation_aleatoire(texte: str, liste=None, proba: float = 0.5) -> str:
         "mutation_argumentaire",
         "mutation_structure_inversee",
     ]
-    nom = random.choice(choix)
-    return appliquer_mutations(texte, [nom], proba)
+    nom = random.Random(seed).choice(choix)
+    return appliquer_mutations(texte, [nom], proba, seed)
 
 
-def appliquer_mutations(texte: str, liste=None, proba: float = 0.5) -> str:
+def appliquer_mutations(texte: str, liste=None, proba: float = 0.5, seed=None) -> str:
     """Applique une mutation ou une liste de mutations, dans l'ordre."""
     if not texte:
         return texte
 
     if liste is None:
-        return mutation_aleatoire(texte, proba=proba)
+        return mutation_aleatoire(texte, proba=proba, seed=seed)
 
     if isinstance(liste, str):
         liste = [liste]
@@ -163,7 +217,7 @@ def appliquer_mutations(texte: str, liste=None, proba: float = 0.5) -> str:
     resultat = texte
     for nom in liste:
         if nom == "mutation_argumentaire":
-            resultat = mutation_argumentaire(resultat, proba)
+            resultat = mutation_argumentaire(resultat, proba, seed)
         elif nom == "mutation_structure_inversee":
             resultat = mutation_structure_inversee(resultat, proba)
         elif nom == "mutation_aleatoire":

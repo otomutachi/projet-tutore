@@ -83,9 +83,7 @@ def afficher_resultats(prompts_original, prompts_mutes, nom_mutation=""):
     def sanitize_for_display(text, max_len=320):
         if text is None:
             return ""
-        # Retire les blocs de code délimités.
         cleaned = re.sub(r"```.*?```", "", str(text), flags=re.S)
-        # Repère la présence probable de code.
         code_markers = ['#include', 'malloc(', 'printf(', 'strcpy(', 'char ', 'int ', '<MASK>', '{', '}']
         first_idx = None
         for marker in code_markers:
@@ -94,13 +92,10 @@ def afficher_resultats(prompts_original, prompts_mutes, nom_mutation=""):
                 if first_idx is None or idx < first_idx:
                     first_idx = idx
         if first_idx is not None:
-            # Conserve le texte avant le code, de préférence au niveau d'un paragraphe.
             before = cleaned[:first_idx]
             if '\n\n' in before:
                 before = before.split('\n\n')[0]
-            # Retire le code sans ajouter de marqueur.
             cleaned = before.strip()
-        # Réduit les espaces et tronque le texte.
         single = ' '.join(cleaned.split())
         if len(single) > max_len:
             single = single[:max_len] + '...'

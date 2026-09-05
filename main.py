@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 # Script principal simple qui montre des mutations de prompts
 
+import random
 import sys
 from pathlib import Path
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 SRC_DIR = PROJECT_ROOT / "src"
@@ -28,6 +32,17 @@ PROMPTS_DE_FALLBACK = [
     "String as input",
     "Projets tutorés sur les LLMs",
 ]
+DEMO_PROMPT_LIMIT = 2
+DEMO_SEED = 20260904
+
+
+def _appliquer_mutation(mutation, prompt: str, proba: float, seed: int) -> str:
+    """Applique une mutation avec seed quand son API le permet."""
+    random.seed(seed)
+    try:
+        return mutation.appliquer(prompt, proba, seed=seed)
+    except TypeError:
+        return mutation.appliquer(prompt, proba)
 
 
 def appliquer_mutations(chaine: str, liste_mutations, proba: float) -> str:
@@ -72,22 +87,24 @@ def main() -> int:
 
     resultats = []
     probas = [0.2, 0.8]
-    prompts_affiches = prompts[: min(2, len(prompts))]
+    prompts_demo = prompts[:DEMO_PROMPT_LIMIT]
+    prompts_affiches = prompts_demo
     if not prompts_affiches:
         prompts_affiches = ["Projet tutoré sur les prompts"]
 
     print("=" * 60)
-    print("DEMONSTRATION DES MUTATIONS PROBABILISTES")
+    print("DÉMONSTRATION DES MUTATIONS PROBABILISTES")
     print("=" * 60)
 
     for nom_mutation, mutation in mutations:
         print(f"\n=== {nom_mutation.upper()} ===")
         for proba in probas:
-            prompts_mutes = [mutation.appliquer(prompt, proba) for prompt in prompts]
-            prompts_affiches_mutes = [
-                mutation.appliquer(prompt, proba) for prompt in prompts_affiches
+            prompts_mutes = [
+                _appliquer_mutation(mutation, prompt, proba, DEMO_SEED + index)
+                for index, prompt in enumerate(prompts_demo)
             ]
-            print(f"\nProbabilite : {proba}")
+            prompts_affiches_mutes = prompts_mutes
+            print(f"\nProbabilité : {proba}")
             afficher_resultats(prompts_affiches, prompts_affiches_mutes, nom_mutation)
             resultats.append(
                 {
@@ -100,7 +117,7 @@ def main() -> int:
                 }
             )
 
-    print("\n=== DEMO SYNONYME FORCÉ ===")
+    print("\n=== DÉMONSTRATION DU SYNONYME FORCÉ ===")
     exemple = "Projet tutoré sur les prompts"
     mut_syn = RemplacementSynonymes().appliquer(exemple, 1.0)
     print("Original :", exemple)
@@ -111,13 +128,13 @@ def main() -> int:
     cve_prompts = charger_prompts_cve(PROJECT_ROOT / "prompts_cve.json")
     if cve_prompts:
         print("\n" + "=" * 60)
-        print("TEST A GRANDE ECHELLE AVEC PROMPTS CVE")
+        print("TEST À GRANDE ÉCHELLE AVEC LES PROMPTS CVE")
         print("=" * 60)
         exemples = list(cve_prompts.items())[:2]
         mutations_grandes = [RemplacementSynonymes(), PermutationLettres(), DilutionContexte()]
         for constraint, prompt in exemples:
             print(f"\nContrainte : {constraint}")
-            # use afficher_resultats sanitizer by passing single-item lists
+            # Utilise l'affichage avec une seule entrée.
             afficher_resultats([prompt], [prompt], nom_mutation="original_cve_preview")
             for mutation in mutations_grandes:
                 resultat = mutation.appliquer(prompt, 0.7)
@@ -131,7 +148,7 @@ def main() -> int:
     try:
         exemple = "voiture rapide et sécurisée"
         trad = traduire_texte(exemple, "en")
-        print("\n=== DEMO TRADUCTION ARGOS ===")
+        print("\n=== DÉMONSTRATION DE TRADUCTION ARGOS ===")
         print("Original :", exemple)
         print("Traduction (en) :", trad)
     except Exception:

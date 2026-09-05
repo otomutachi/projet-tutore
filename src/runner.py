@@ -1,5 +1,6 @@
 import random
 
+from mutations_orthographiques import faute_de_frappe
 from mutations_semantiques import remplacement_synonymes, traduction_anglais
 from mutations_syntaxiques import (
     mutation_argumentaire,
@@ -7,6 +8,7 @@ from mutations_syntaxiques import (
 )
 
 MUTATIONS = {
+    "erreur_frappe": faute_de_frappe,
     "argumentaire": mutation_argumentaire,
     "structure_inversee": mutation_structure_inversee,
     "synonyme": remplacement_synonymes,
