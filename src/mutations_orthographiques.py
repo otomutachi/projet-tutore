@@ -1,5 +1,4 @@
 import random
-import re
 
 from mutation_base import Mutation
 
@@ -145,6 +144,8 @@ def doubler_ponctuation(texte: str, seed: int) -> str:
 
 def inserer_virgule_aleatoire(texte: str, seed: int) -> str:
     """Insere une virgule entre deux mots a une position aleatoire."""
+    import re
+
     if not any(caractere in texte for caractere in ".,!?"):
         return texte
 
@@ -162,6 +163,8 @@ def inserer_virgule_aleatoire(texte: str, seed: int) -> str:
 
 def casse_apres_ponctuation(texte: str, seed: int) -> str:
     """Met en minuscule une lettre choisie apres un point."""
+    import re
+
     correspondances = list(re.finditer(r"\.\s([A-ZÀ-ÖØ-Þ])", texte))
     if not correspondances:
         return texte
