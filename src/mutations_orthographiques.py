@@ -1,4 +1,5 @@
 import random
+import re
 
 from mutation_base import Mutation
 
@@ -129,3 +130,58 @@ def faute_de_frappe(chaine: str, proba: float) -> str:
 
 def alphabet_grec(chaine: str, proba: float) -> str:
     return AlphabetGrec().appliquer(chaine, proba)
+
+
+def doubler_ponctuation(texte: str, seed: int) -> str:
+    """Duplique un signe de ponctuation choisi au hasard."""
+    positions = [index for index, caractere in enumerate(texte) if caractere in ".,!?"]
+    if not positions:
+        return texte
+
+    generateur = random.Random(seed)
+    position = generateur.choice(positions)
+    return texte[:position] + texte[position] + texte[position:]
+
+
+def inserer_virgule_aleatoire(texte: str, seed: int) -> str:
+    """Insere une virgule entre deux mots a une position aleatoire."""
+    if not any(caractere in texte for caractere in ".,!?"):
+        return texte
+
+    positions = [
+        correspondance.end()
+        for correspondance in re.finditer(r"\S+(?=\s+\S)", texte)
+    ]
+    if not positions:
+        return texte
+
+    generateur = random.Random(seed)
+    position = generateur.choice(positions)
+    return texte[:position] + "," + texte[position:]
+
+
+def casse_apres_ponctuation(texte: str, seed: int) -> str:
+    """Met en minuscule une lettre choisie apres un point."""
+    correspondances = list(re.finditer(r"\.\s([A-ZÀ-ÖØ-Þ])", texte))
+    if not correspondances:
+        return texte
+
+    generateur = random.Random(seed)
+    correspondance = generateur.choice(correspondances)
+    position = correspondance.start(1)
+    return texte[:position] + texte[position].lower() + texte[position + 1:]
+
+
+def remplacer_ponctuation_aleatoire(texte: str, seed: int) -> str:
+    """Remplace un signe de ponctuation par un autre signe."""
+    signes = ".,!?;"
+    positions = [index for index, caractere in enumerate(texte) if caractere in signes]
+    if not positions:
+        return texte
+
+    generateur = random.Random(seed)
+    position = generateur.choice(positions)
+    original = texte[position]
+    remplacements = [signe for signe in signes if signe != original]
+    remplacement = generateur.choice(remplacements)
+    return texte[:position] + remplacement + texte[position + 1:]
