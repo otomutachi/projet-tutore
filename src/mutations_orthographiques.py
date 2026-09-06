@@ -1,4 +1,6 @@
 import random
+import string
+import string
 
 from mutation_base import Mutation
 
@@ -133,7 +135,10 @@ def alphabet_grec(chaine: str, proba: float) -> str:
 
 def doubler_ponctuation(texte: str, seed: int) -> str:
     """Duplique un signe de ponctuation choisi au hasard."""
-    positions = [index for index, caractere in enumerate(texte) if caractere in ".,!?"]
+    positions = [
+        index for index, caractere in enumerate(texte)
+        if caractere in string.punctuation
+    ]
     if not positions:
         return texte
 
@@ -144,15 +149,12 @@ def doubler_ponctuation(texte: str, seed: int) -> str:
 
 def inserer_virgule_aleatoire(texte: str, seed: int) -> str:
     """Insere une virgule entre deux mots a une position aleatoire."""
-    import re
-
-    if not any(caractere in texte for caractere in ".,!?"):
-        return texte
-
-    positions = [
-        correspondance.end()
-        for correspondance in re.finditer(r"\S+(?=\s+\S)", texte)
-    ]
+    positions = []
+    for index in range(len(texte) - 1):
+        if not texte[index].isspace() and texte[index + 1].isspace():
+            suite = texte[index + 1:].lstrip()
+            if suite:
+                positions.append(index + 1)
     if not positions:
         return texte
 
@@ -163,21 +165,21 @@ def inserer_virgule_aleatoire(texte: str, seed: int) -> str:
 
 def casse_apres_ponctuation(texte: str, seed: int) -> str:
     """Met en minuscule une lettre choisie apres un point."""
-    import re
-
-    correspondances = list(re.finditer(r"\.\s([A-ZÀ-ÖØ-Þ])", texte))
-    if not correspondances:
+    positions = []
+    for index in range(len(texte) - 2):
+        if texte[index:index + 2] == ". " and texte[index + 2].isupper():
+            positions.append(index + 2)
+    if not positions:
         return texte
 
     generateur = random.Random(seed)
-    correspondance = generateur.choice(correspondances)
-    position = correspondance.start(1)
+    position = generateur.choice(positions)
     return texte[:position] + texte[position].lower() + texte[position + 1:]
 
 
 def remplacer_ponctuation_aleatoire(texte: str, seed: int) -> str:
     """Remplace un signe de ponctuation par un autre signe."""
-    signes = ".,!?;"
+    signes = string.punctuation
     positions = [index for index, caractere in enumerate(texte) if caractere in signes]
     if not positions:
         return texte
@@ -185,6 +187,5 @@ def remplacer_ponctuation_aleatoire(texte: str, seed: int) -> str:
     generateur = random.Random(seed)
     position = generateur.choice(positions)
     original = texte[position]
-    remplacements = [signe for signe in signes if signe != original]
-    remplacement = generateur.choice(remplacements)
+    remplacement = generateur.choice(signes.replace(original, ""))
     return texte[:position] + remplacement + texte[position + 1:]

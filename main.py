@@ -18,6 +18,10 @@ from mutations_orthographiques import (
     FauteDeFrappe,
     RemplacementAccents,
     RemplacementEPar3,
+    casse_apres_ponctuation,
+    doubler_ponctuation,
+    inserer_virgule_aleatoire,
+    remplacer_ponctuation_aleatoire,
 )
 from mutations_semantiques import RemplacementSynonymes, TraductionAnglais
 from mutations_syntaxiques import DilutionContexte, PermutationLettres, PermutationMots
@@ -34,6 +38,27 @@ PROMPTS_DE_FALLBACK = [
 ]
 DEMO_PROMPT_LIMIT = 2
 DEMO_SEED = 20260904
+
+
+def tester_mutations_ponctuation() -> None:
+    """Teste les mutations de ponctuation avec des resultats reproductibles."""
+    texte = "Bonjour. Monde, comment allez-vous?"
+    resultats = {
+        "doubler": doubler_ponctuation(texte, DEMO_SEED),
+        "virgule": inserer_virgule_aleatoire("Bonjour tout le monde", DEMO_SEED),
+        "casse": casse_apres_ponctuation(texte, DEMO_SEED),
+        "remplacer": remplacer_ponctuation_aleatoire(texte, DEMO_SEED),
+    }
+
+    assert len(resultats["doubler"]) == len(texte) + 1
+    assert resultats["virgule"].count(",") == 1
+    assert resultats["casse"] != texte
+    assert resultats["remplacer"] != texte
+
+    print("\n=== TESTS DES MUTATIONS DE PONCTUATION ===")
+    for nom, resultat in resultats.items():
+        print(f"{nom} : {resultat}")
+    print("Tests de ponctuation reussis")
 
 
 def _appliquer_mutation(mutation, prompt: str, proba: float, seed: int) -> str:
@@ -72,6 +97,8 @@ def main() -> int:
         prompts = charger_prompts(PROJECT_ROOT / "prompts.json")
     if not prompts:
         prompts = PROMPTS_DE_FALLBACK
+
+    tester_mutations_ponctuation()
 
     mutations = [
         ("remplacement_e_par_3", RemplacementEPar3()),
