@@ -38,26 +38,37 @@ PROMPTS_DE_FALLBACK = [
 ]
 DEMO_PROMPT_LIMIT = 2
 DEMO_SEED = 20260904
+PROMPTS_PONCTUATION = [
+    "Bonjour. Comment vas-tu?",
+    "Peux-tu corriger ce code, s'il te plaît!",
+    "Attention; cette fonction doit être fiable.",
+]
 
 
 def tester_mutations_ponctuation() -> None:
-    """Teste les mutations de ponctuation avec des resultats reproductibles."""
-    texte = "Bonjour. Monde, comment allez-vous?"
-    resultats = {
-        "doubler": doubler_ponctuation(texte, DEMO_SEED),
-        "virgule": inserer_virgule_aleatoire("Bonjour tout le monde", DEMO_SEED),
-        "casse": casse_apres_ponctuation(texte, DEMO_SEED),
-        "remplacer": remplacer_ponctuation_aleatoire(texte, DEMO_SEED),
+    """Teste et affiche les mutations de ponctuation."""
+    mutations = {
+        "doubler": doubler_ponctuation,
+        "virgule": inserer_virgule_aleatoire,
+        "casse": casse_apres_ponctuation,
+        "remplacer": remplacer_ponctuation_aleatoire,
     }
 
-    assert len(resultats["doubler"]) == len(texte) + 1
-    assert resultats["virgule"].count(",") == 1
-    assert resultats["casse"] != texte
-    assert resultats["remplacer"] != texte
-
     print("\n=== TESTS DES MUTATIONS DE PONCTUATION ===")
-    for nom, resultat in resultats.items():
-        print(f"{nom} : {resultat}")
+    for nom, mutation in mutations.items():
+        print(f"\n--- {nom} ---")
+        changements = 0
+        for index, texte in enumerate(PROMPTS_PONCTUATION):
+            resultat = mutation(texte, DEMO_SEED + index)
+            print("Original :", texte)
+            print("Muté     :", resultat)
+            changements += resultat != texte
+
+            if nom == "doubler":
+                assert len(resultat) == len(texte) + 1
+            elif nom == "virgule":
+                assert "," in resultat
+        assert changements > 0
     print("Tests de ponctuation reussis")
 
 

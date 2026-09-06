@@ -70,7 +70,7 @@ class TestMutations(unittest.TestCase):
 
     def test_remplacement_synonymes_phrase(self):
         entree = "Projet tutoré sur les prompts"
-        attendu = "Application encadrée parmi les requêtes"
+        attendu = "Application encadrée sur les requêtes"
         with patch.object(mutations_semantiques, "obtenir_synonyme", side_effect=["Application", "encadrée", "parmi", "les", "requêtes"]):
             with patch.object(mutations_semantiques, "obtenir_traduction", return_value=None):
                 resultat = remplacement_synonymes(entree, 1.0, seed=7)
@@ -88,6 +88,21 @@ class TestMutations(unittest.TestCase):
             with patch.object(mutations_semantiques, "obtenir_traduction", side_effect=["hello", "world"]):
                 resultat = traduction_vers(entree, "en", 1.0, seed=7)
         self.assertEqual(resultat, attendu)
+
+    def test_traduction_n_utilise_pas_les_synonymes(self):
+        with patch.object(
+            mutations_semantiques,
+            "obtenir_synonyme",
+            side_effect=AssertionError("La traduction ne doit pas chercher de synonyme"),
+        ):
+            with patch.object(
+                mutations_semantiques,
+                "obtenir_traduction",
+                return_value="project",
+            ):
+                resultat = traduction_vers("projet", "en", 1.0, seed=7)
+
+        self.assertEqual(resultat, "project")
 
     def test_traduction_anglais_mot_connu_exact_projet(self):
         entree = "projet"

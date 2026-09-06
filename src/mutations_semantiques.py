@@ -1,16 +1,13 @@
 import re
 import random
 
+from stopwordsiso import stopwords
+
 from mutation_base import Mutation
 from pydict_wrapper import obtenir_synonyme, obtenir_traduction
 
 
 _TOKEN_MOT = re.compile(r"^(?P<prefix>[^\wÀ-ÿ]*)(?P<mot>[\wÀ-ÿ]+)(?P<suffix>[^\wÀ-ÿ]*)$", re.UNICODE)
-_MOTS_OUTILS = {
-    "a", "au", "aux", "avec", "ce", "ces", "dans", "de", "des", "du",
-    "en", "et", "il", "la", "le", "les", "mais", "ne", "nos", "ou",
-    "par", "pas", "pour", "que", "qui", "sur", "un", "une", "vos", "vous",
-}
 
 
 def _decomposer_mot(mot: str):
@@ -45,7 +42,7 @@ def reformuler_phrase(chaine: str, proba: float = 0.5, seed=None) -> str:
         remplacement = obtenir_synonyme(mot, sous_seed)
         if remplacement is None:
             remplacement = obtenir_traduction(mot, sous_seed)
-        if remplacement and remplacement.lower() not in _MOTS_OUTILS:
+        if remplacement and remplacement.lower() not in stopwords("fr"):
             if mot.istitle():
                 remplacement = remplacement.capitalize()
             resultat.append(prefixe + remplacement + suffixe)
@@ -85,7 +82,7 @@ class RemplacementSynonymes(Mutation):
                 if generateur.random() < proba:
                     sous_seed = generateur.randrange(2**32)
                     remplacement = obtenir_synonyme(mot_propre, sous_seed)
-                    if remplacement and remplacement.lower() not in _MOTS_OUTILS:
+                    if remplacement and remplacement.lower() not in stopwords("fr"):
                         if mot_propre.istitle():
                             remplacement = remplacement.capitalize()
                         nouvelle_liste.append(prefixe + remplacement + suffixe)
@@ -123,9 +120,9 @@ class TraductionGenerique(Mutation):
             if parties is not None:
                 prefixe, mot_propre, suffixe = parties
                 if generateur.random() < proba:
-                    remplacement = obtenir_synonyme(mot_propre, generateur.randrange(2**32))
-                    if remplacement is None:
-                        remplacement = obtenir_traduction(mot_propre, generateur.randrange(2**32))
+                    remplacement = obtenir_traduction(
+                        mot_propre, generateur.randrange(2**32)
+                    )
                     if remplacement and remplacement != mot_propre:
                         nouvelle_liste.append(prefixe + remplacement + suffixe)
                         continue
