@@ -10,7 +10,16 @@ SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-from mutations_orthographiques import AlphabetGrec, FauteDeFrappe, RemplacementAccents, RemplacementEPar3
+from mutations_orthographiques import (
+    AlphabetGrec,
+    FauteDeFrappe,
+    RemplacementAccents,
+    RemplacementEPar3,
+    casse_apres_ponctuation,
+    doubler_ponctuation,
+    inserer_virgule_aleatoire,
+    remplacer_ponctuation_aleatoire,
+)
 from mutations_semantiques import (
     RemplacementSynonymes,
     TraductionAnglais,
@@ -165,6 +174,36 @@ class TestMutations(unittest.TestCase):
 
     def test_faute_de_frappe_chaine_vide(self):
         self.assertEqual(FauteDeFrappe().appliquer("", 0.5), "")
+
+    def test_doubler_ponctuation_sortie_attendue_avec_seed(self):
+        texte = "Bonjour tout le monde."
+        self.assertEqual(doubler_ponctuation(texte, seed=7), "Bonjour tout le monde..")
+
+    def test_inserer_virgule_sortie_attendue_avec_seed(self):
+        texte = "Bonjour tout le monde."
+        self.assertEqual(inserer_virgule_aleatoire(texte, seed=7), "Bonjour tout, le monde.")
+
+    def test_casse_apres_ponctuation_sortie_attendue_avec_seed(self):
+        texte = "Bonjour. Comment vas-tu?"
+        self.assertEqual(casse_apres_ponctuation(texte, seed=7), "Bonjour. comment vas-tu?")
+
+    def test_remplacer_ponctuation_sortie_attendue_avec_seed(self):
+        texte = "Bonjour tout le monde."
+        self.assertEqual(remplacer_ponctuation_aleatoire(texte, seed=7), "Bonjour tout le monde~")
+
+    def test_ponctuation_est_deterministe_avec_le_meme_seed(self):
+        texte = "Bonjour. Comment vas-tu?"
+        fonctions = (
+            doubler_ponctuation,
+            inserer_virgule_aleatoire,
+            casse_apres_ponctuation,
+            remplacer_ponctuation_aleatoire,
+        )
+        for fonction in fonctions:
+            with self.subTest(fonction=fonction.__name__):
+                resultat1 = fonction(texte, seed=7)
+                resultat2 = fonction(texte, seed=7)
+                self.assertEqual(resultat1, resultat2)
 
     def test_alphabet_grec_proba_zero(self):
         chaine = "aeiou"
