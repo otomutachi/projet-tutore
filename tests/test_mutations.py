@@ -37,7 +37,16 @@ from mutations_syntaxiques import (
     mutation_argumentaire,
     mutation_structure_inversee,
 )
-from runner import appliquer_liste, appliquer_mutation, mutation_aleatoire as mutation_aleatoire_runner
+from runner import (
+    analyser_entree,
+    appliquer_liste,
+    appliquer_mutation,
+    appliquer_mutations_controlees,
+    mutation_aleatoire as mutation_aleatoire_runner,
+    nettoyer_mutation,
+    presenter_mutation,
+)
+import runner
 from helpers import charger_prompts_cve
 
 
@@ -310,6 +319,44 @@ class TestMutations(unittest.TestCase):
                     mutation_aleatoire_runner(entree, 0.5),
                     "j'ai besoin de une fonction qui trie une liste, tu peux faire ça ?",
                 )
+
+    def test_analyser_entree_separe_et_protege_les_mots(self):
+        elements = analyser_entree("Un code, fiable !", exclusions=["code"])
+        mots_mutables = [element["mot"] for element in elements if element["mutable"]]
+        mots_proteges = [element["mot"] for element in elements if element["protege"] and element["mot"]]
+        self.assertEqual(mots_mutables, ["Un", "fiable"])
+        self.assertEqual(mots_proteges, ["code"])
+
+    def test_mutations_controlees_limite_et_conserve_ordre(self):
+        with patch.dict(runner.MUTATIONS, {"marque": lambda texte, proba: f"[{texte}]"}, clear=False):
+            resultat = appliquer_mutations_controlees(
+                "un code fiable",
+                "marque",
+                proba=1,
+                nombre=1,
+                exclusions=["code"],
+                seed=7,
+            )
+
+        self.assertEqual(resultat.count("["), 1)
+        self.assertIn("code", resultat)
+        self.assertEqual(resultat.split()[1], "code")
+
+    def test_mutations_controlees_nombre_aleatoire_reproductible(self):
+        with patch.dict(runner.MUTATIONS, {"marque": lambda texte, proba: f"[{texte}]"}, clear=False):
+            resultat1 = appliquer_mutations_controlees("un deux trois", "marque", seed=9)
+            resultat2 = appliquer_mutations_controlees("un deux trois", "marque", seed=9)
+
+        self.assertEqual(resultat1, resultat2)
+        self.assertLessEqual(resultat1.count("["), 3)
+
+    def test_nettoyer_et_presenter_mutation(self):
+        resultat = nettoyer_mutation("  texte  \r\nligne  \n")
+        self.assertEqual(resultat, "texte\nligne")
+        self.assertEqual(
+            presenter_mutation("entrée", "sortie", "marque"),
+            "Mutation : marque\nEntrée : entrée\nSortie : sortie",
+        )
 
     def test_remplacement_synonymes_proba_zero(self):
         chaine = "Projet tutoré sur les prompts"
