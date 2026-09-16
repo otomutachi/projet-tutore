@@ -21,34 +21,46 @@ def _decomposer_mot(mot: str):
     )
 
 
-def reformuler_phrase(chaine: str, proba: float = 0.5, seed=None) -> str:
-    """Reformule les mots en conservant espaces et ponctuation."""
-    if not chaine:
-        return chaine
+class ReformulationPhrase(Mutation):
+    """Reformule les mots en conservant les espaces et la ponctuation."""
 
-    generateur = random.Random(seed)
-    morceaux = re.findall(r"\s+|\S+", chaine, re.UNICODE)
-    resultat = []
-    for morceau in morceaux:
-        parties = _decomposer_mot(morceau)
-        if parties is None:
-            resultat.append(morceau)
-            continue
-        prefixe, mot, suffixe = parties
-        if generateur.random() >= proba:
-            resultat.append(morceau)
-            continue
-        sous_seed = generateur.randrange(2**32)
-        remplacement = obtenir_synonyme(mot, sous_seed)
-        if remplacement is None:
-            remplacement = obtenir_traduction(mot, sous_seed)
-        if remplacement and remplacement.lower() not in stopwords("fr"):
-            if mot.istitle():
-                remplacement = remplacement.capitalize()
-            resultat.append(prefixe + remplacement + suffixe)
-        else:
-            resultat.append(morceau)
-    return "".join(resultat)
+    def appliquer(self, chaine: str, proba: float = 0.5, seed=None) -> str:
+        if not 0 <= proba <= 1:
+            raise ValueError("proba doit être compris entre 0 et 1")
+        return self.apply(chaine, proba, seed)
+
+    def apply(self, chaine: str, proba: float = 0.5, seed=None) -> str:
+        if not chaine:
+            return chaine
+
+        generateur = random.Random(seed)
+        morceaux = re.findall(r"\s+|\S+", chaine, re.UNICODE)
+        resultat = []
+        for morceau in morceaux:
+            parties = _decomposer_mot(morceau)
+            if parties is None:
+                resultat.append(morceau)
+                continue
+            prefixe, mot, suffixe = parties
+            if generateur.random() >= proba:
+                resultat.append(morceau)
+                continue
+            sous_seed = generateur.randrange(2**32)
+            remplacement = obtenir_synonyme(mot, sous_seed)
+            if remplacement is None:
+                remplacement = obtenir_traduction(mot, sous_seed)
+            if remplacement and remplacement.lower() not in stopwords("fr"):
+                if mot.istitle():
+                    remplacement = remplacement.capitalize()
+                resultat.append(prefixe + remplacement + suffixe)
+            else:
+                resultat.append(morceau)
+        return "".join(resultat)
+
+
+def reformuler_phrase(chaine: str, proba: float = 0.5, seed=None) -> str:
+    """Compatibilité : reformule une phrase avec une classe dédiée."""
+    return ReformulationPhrase().appliquer(chaine, proba, seed)
 
 
 class RemplacementSynonymes(Mutation):

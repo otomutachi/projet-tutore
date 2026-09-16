@@ -132,59 +132,116 @@ def alphabet_grec(chaine: str, proba: float) -> str:
     return AlphabetGrec().appliquer(chaine, proba)
 
 
-def doubler_ponctuation(texte: str, seed: int) -> str:
-    """Duplique un signe de ponctuation choisi au hasard."""
-    positions = [
-        index for index, caractere in enumerate(texte)
-        if caractere in string.punctuation
-    ]
-    if not positions:
-        return texte
+class MutationPonctuation(Mutation):
+    """Base des mutations de ponctuation utilisant une graine locale."""
 
-    generateur = random.Random(seed)
-    position = generateur.choice(positions)
-    return texte[:position] + texte[position] + texte[position:]
+    def appliquer(self, texte: str, proba: float = 1.0, seed=None) -> str:
+        if not 0 <= proba <= 1:
+            raise ValueError("proba doit être compris entre 0 et 1")
+        return self.apply(texte, proba, seed)
+
+
+class DoublerPonctuation(MutationPonctuation):
+    """Duplique un signe de ponctuation choisi au hasard."""
+
+    def apply(self, texte: str, proba: float = 1.0, seed=None) -> str:
+        generateur = random.Random(seed)
+        if not texte or proba == 0:
+            return texte
+        if proba < 1 and generateur.random() >= proba:
+            return texte
+
+        positions = [
+            index for index, caractere in enumerate(texte)
+            if caractere in string.punctuation
+        ]
+        if not positions:
+            return texte
+
+        position = generateur.choice(positions)
+        return texte[:position] + texte[position] + texte[position:]
+
+
+class InsererVirguleAleatoire(MutationPonctuation):
+    """Insère une virgule entre deux mots à une position aléatoire."""
+
+    def apply(self, texte: str, proba: float = 1.0, seed=None) -> str:
+        generateur = random.Random(seed)
+        if not texte or proba == 0:
+            return texte
+        if proba < 1 and generateur.random() >= proba:
+            return texte
+
+        positions = []
+        for index in range(len(texte) - 1):
+            if not texte[index].isspace() and texte[index + 1].isspace():
+                suite = texte[index + 1:].lstrip()
+                if suite:
+                    positions.append(index + 1)
+        if not positions:
+            return texte
+
+        position = generateur.choice(positions)
+        return texte[:position] + "," + texte[position:]
+
+
+class CasseApresPonctuation(MutationPonctuation):
+    """Met en minuscule une lettre choisie après un point."""
+
+    def apply(self, texte: str, proba: float = 1.0, seed=None) -> str:
+        generateur = random.Random(seed)
+        if not texte or proba == 0:
+            return texte
+        if proba < 1 and generateur.random() >= proba:
+            return texte
+
+        positions = []
+        for index in range(len(texte) - 2):
+            if texte[index:index + 2] == ". " and texte[index + 2].isupper():
+                positions.append(index + 2)
+        if not positions:
+            return texte
+
+        position = generateur.choice(positions)
+        return texte[:position] + texte[position].lower() + texte[position + 1:]
+
+
+class RemplacerPonctuationAleatoire(MutationPonctuation):
+    """Remplace un signe de ponctuation par un autre signe."""
+
+    def apply(self, texte: str, proba: float = 1.0, seed=None) -> str:
+        generateur = random.Random(seed)
+        if not texte or proba == 0:
+            return texte
+        if proba < 1 and generateur.random() >= proba:
+            return texte
+
+        signes = string.punctuation
+        positions = [index for index, caractere in enumerate(texte) if caractere in signes]
+        if not positions:
+            return texte
+
+        position = generateur.choice(positions)
+        original = texte[position]
+        remplacement = generateur.choice(signes.replace(original, ""))
+        return texte[:position] + remplacement + texte[position + 1:]
+
+
+def doubler_ponctuation(texte: str, seed: int) -> str:
+    """Compatibilité : duplique un signe de ponctuation choisi au hasard."""
+    return DoublerPonctuation().apply(texte, 1.0, seed)
 
 
 def inserer_virgule_aleatoire(texte: str, seed: int) -> str:
-    """Insere une virgule entre deux mots a une position aleatoire."""
-    positions = []
-    for index in range(len(texte) - 1):
-        if not texte[index].isspace() and texte[index + 1].isspace():
-            suite = texte[index + 1:].lstrip()
-            if suite:
-                positions.append(index + 1)
-    if not positions:
-        return texte
-
-    generateur = random.Random(seed)
-    position = generateur.choice(positions)
-    return texte[:position] + "," + texte[position:]
+    """Compatibilité : insère une virgule à une position aléatoire."""
+    return InsererVirguleAleatoire().apply(texte, 1.0, seed)
 
 
 def casse_apres_ponctuation(texte: str, seed: int) -> str:
-    """Met en minuscule une lettre choisie apres un point."""
-    positions = []
-    for index in range(len(texte) - 2):
-        if texte[index:index + 2] == ". " and texte[index + 2].isupper():
-            positions.append(index + 2)
-    if not positions:
-        return texte
-
-    generateur = random.Random(seed)
-    position = generateur.choice(positions)
-    return texte[:position] + texte[position].lower() + texte[position + 1:]
+    """Compatibilité : met en minuscule une lettre après un point."""
+    return CasseApresPonctuation().apply(texte, 1.0, seed)
 
 
 def remplacer_ponctuation_aleatoire(texte: str, seed: int) -> str:
-    """Remplace un signe de ponctuation par un autre signe."""
-    signes = string.punctuation
-    positions = [index for index, caractere in enumerate(texte) if caractere in signes]
-    if not positions:
-        return texte
-
-    generateur = random.Random(seed)
-    position = generateur.choice(positions)
-    original = texte[position]
-    remplacement = generateur.choice(signes.replace(original, ""))
-    return texte[:position] + remplacement + texte[position + 1:]
+    """Compatibilité : remplace un signe de ponctuation au hasard."""
+    return RemplacerPonctuationAleatoire().apply(texte, 1.0, seed)

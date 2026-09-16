@@ -141,10 +141,6 @@ def permutation_mots(chaine: str, proba: float) -> str:
     return PermutationMots().appliquer(chaine, proba)
 
 
-def dilution_contexte(chaine: str, proba: float, seed=None) -> str:
-    return DilutionContexte().appliquer(chaine, proba, seed)
-
-
 def _nettoyer_espaces(texte: str) -> str:
     """Nettoie les espaces inutiles."""
     texte = texte.strip()
@@ -152,74 +148,114 @@ def _nettoyer_espaces(texte: str) -> str:
     return texte
 
 
+class MutationArgumentaire(Mutation):
+    """Reformule la demande comme un besoin ou un argumentaire."""
+
+    def appliquer(self, texte: str, proba: float = 0.5, seed=None) -> str:
+        return self.apply(texte, proba, seed)
+
+    def apply(self, texte: str, proba: float = 0.5, seed=None) -> str:
+        if not texte:
+            return texte
+
+        phrase = _nettoyer_espaces(texte).rstrip("?!. ").strip()
+        phrase = reformuler_phrase(phrase, proba, seed)
+
+        if "j'ai besoin de" not in phrase.lower():
+            phrase = f"j'ai besoin de {phrase}"
+
+        if "tu peux" not in phrase.lower() and "peux" not in phrase.lower():
+            phrase = f"{phrase}, tu peux faire ça ?"
+        else:
+            phrase = f"{phrase} ?"
+
+        return _nettoyer_espaces(phrase)
+
+
+class MutationStructureInversee(Mutation):
+    """Inverse une partie de la structure d'une phrase."""
+
+    def appliquer(self, texte: str, proba: float = 0.5, seed=None) -> str:
+        return self.apply(texte, proba, seed)
+
+    def apply(self, texte: str, proba: float = 0.5, seed=None) -> str:
+        if not texte:
+            return texte
+
+        _ = (proba, seed)
+        phrase = _nettoyer_espaces(texte).rstrip("?!. ").strip()
+        mots = phrase.split()
+
+        if len(mots) > 4 and " qui " in phrase.lower():
+            partie1, partie2 = phrase.split(" qui ", 1)
+            return f"{partie2}, {partie1} ?"
+
+        if len(mots) > 4:
+            return f"{' '.join(mots[2:])}, {' '.join(mots[:2])} ?"
+
+        return f"{phrase}, comme ça tu vois ?"
+
+
+class ApplicationMutations(Mutation):
+    """Applique une liste de mutations syntaxiques dans l'ordre."""
+
+    def appliquer(self, texte: str, liste=None, proba: float = 0.5, seed=None) -> str:
+        return self.apply(texte, liste, proba, seed)
+
+    def apply(self, texte: str, liste=None, proba: float = 0.5, seed=None) -> str:
+        if not texte:
+            return texte
+
+        if liste is None:
+            return MutationAleatoire().apply(texte, proba, seed=seed)
+
+        if isinstance(liste, str):
+            liste = [liste]
+
+        resultat = texte
+        for nom in liste:
+            if nom == "mutation_argumentaire":
+                resultat = MutationArgumentaire().apply(resultat, proba, seed)
+            elif nom == "mutation_structure_inversee":
+                resultat = MutationStructureInversee().apply(resultat, proba, seed)
+            elif nom == "mutation_aleatoire":
+                resultat = MutationAleatoire().apply(resultat, proba=proba, seed=seed)
+        return resultat
+
+
+class MutationAleatoire(Mutation):
+    """Choisit et applique aléatoirement une mutation syntaxique."""
+
+    def appliquer(self, texte: str, liste=None, proba: float = 0.5, seed=None) -> str:
+        return self.apply(texte, liste, proba, seed)
+
+    def apply(self, texte: str, liste=None, proba: float = 0.5, seed=None) -> str:
+        if not texte:
+            return texte
+
+        choix = liste or [
+            "mutation_argumentaire",
+            "mutation_structure_inversee",
+        ]
+        nom = random.Random(seed).choice(choix)
+        return ApplicationMutations().apply(texte, [nom], proba, seed)
+
+
 def mutation_argumentaire(texte: str, proba: float = 0.5, seed=None) -> str:
-    """Reformule la demande comme un besoin / argumentaire."""
-    if not texte:
-        return texte
-
-    phrase = _nettoyer_espaces(texte).rstrip("?!.").strip()
-    phrase = reformuler_phrase(phrase, proba, seed)
-
-    if "j'ai besoin de" not in phrase.lower():
-        phrase = f"j'ai besoin de {phrase}"
-
-    if "tu peux" not in phrase.lower() and "peux" not in phrase.lower():
-        phrase = f"{phrase}, tu peux faire ça ?"
-    else:
-        phrase = f"{phrase} ?"
-
-    return _nettoyer_espaces(phrase)
+    """Compatibilité : applique la mutation argumentaire."""
+    return MutationArgumentaire().appliquer(texte, proba, seed)
 
 
 def mutation_structure_inversee(texte: str, proba: float = 0.5) -> str:
-    """Inverse un peu la structure, tout en restant compréhensible."""
-    if not texte:
-        return texte
-
-    _ = proba
-    phrase = _nettoyer_espaces(texte).rstrip("?!.").strip()
-    mots = phrase.split()
-
-    if len(mots) > 4 and " qui " in phrase.lower():
-        partie1, partie2 = phrase.split(" qui ", 1)
-        return f"{partie2}, {partie1} ?"
-
-    if len(mots) > 4:
-        return f"{' '.join(mots[2:])}, {' '.join(mots[:2])} ?"
-
-    return f"{phrase}, comme ça tu vois ?"
+    """Compatibilité : applique la mutation de structure inversée."""
+    return MutationStructureInversee().appliquer(texte, proba)
 
 
 def mutation_aleatoire(texte: str, liste=None, proba: float = 0.5, seed=None) -> str:
-    """Applique une mutation simple au hasard."""
-    if not texte:
-        return texte
-
-    choix = liste or [
-        "mutation_argumentaire",
-        "mutation_structure_inversee",
-    ]
-    nom = random.Random(seed).choice(choix)
-    return appliquer_mutations(texte, [nom], proba, seed)
+    """Compatibilité : applique une mutation syntaxique aléatoire."""
+    return MutationAleatoire().appliquer(texte, liste, proba, seed)
 
 
 def appliquer_mutations(texte: str, liste=None, proba: float = 0.5, seed=None) -> str:
-    """Applique une mutation ou une liste de mutations, dans l'ordre."""
-    if not texte:
-        return texte
-
-    if liste is None:
-        return mutation_aleatoire(texte, proba=proba, seed=seed)
-
-    if isinstance(liste, str):
-        liste = [liste]
-
-    resultat = texte
-    for nom in liste:
-        if nom == "mutation_argumentaire":
-            resultat = mutation_argumentaire(resultat, proba, seed)
-        elif nom == "mutation_structure_inversee":
-            resultat = mutation_structure_inversee(resultat, proba)
-        elif nom == "mutation_aleatoire":
-            resultat = mutation_aleatoire(resultat, proba=proba)
-    return resultat
+    """Compatibilité : applique une liste de mutations syntaxiques."""
+    return ApplicationMutations().appliquer(texte, liste, proba, seed)

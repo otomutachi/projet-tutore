@@ -27,6 +27,12 @@ from mutations_semantiques import RemplacementSynonymes, TraductionAnglais
 from mutations_syntaxiques import DilutionContexte, PermutationLettres, PermutationMots
 from helpers import afficher_resultats, charger_prompts, charger_prompts_cve, sauvegarder_prompts
 from pydict_wrapper import traduire_texte
+from runner import (
+    analyser_entree,
+    appliquer_mutations_controlees,
+    nettoyer_mutation,
+    presenter_mutation,
+)
 
 SOURCE_PROMPTS_FILE = PROJECT_ROOT / "dataset1_of_prompts.json"
 PROMPTS_DE_FALLBACK = [
@@ -72,6 +78,32 @@ def tester_mutations_ponctuation() -> None:
     print("Tests de ponctuation reussis")
 
 
+def tester_nouvelles_fonctions() -> None:
+    """Démontre la sélection, la protection et le nettoyage des mutations."""
+    entree = "Génère un code sécurisé rapidement"
+    exclusions = ["code"]
+    elements = analyser_entree(entree, exclusions)
+    elements_mutables = [element["mot"] for element in elements if element["mutable"]]
+    elements_proteges = [element["mot"] for element in elements if element["protege"] and element["mot"]]
+    resultat = appliquer_mutations_controlees(
+        entree,
+        noms="erreur_frappe",
+        proba=1.0,
+        nombre=2,
+        exclusions=exclusions,
+        seed=DEMO_SEED,
+    )
+    resultat_nettoye = nettoyer_mutation(f"  {resultat}  \n")
+
+    print("\n=== TEST DES NOUVELLES FONCTIONS ===")
+    print("Éléments mutables :", elements_mutables)
+    print("Éléments protégés :", elements_proteges)
+    print(presenter_mutation(entree, resultat_nettoye, "erreur_frappe"))
+    assert "code" in resultat_nettoye
+    assert resultat_nettoye == resultat
+    print("Test des nouvelles fonctions réussi")
+
+
 def _appliquer_mutation(mutation, prompt: str, proba: float, seed: int) -> str:
     """Applique une mutation avec seed quand son API le permet."""
     random.seed(seed)
@@ -110,6 +142,7 @@ def main() -> int:
         prompts = PROMPTS_DE_FALLBACK
 
     tester_mutations_ponctuation()
+    tester_nouvelles_fonctions()
 
     mutations = [
         ("remplacement_e_par_3", RemplacementEPar3()),
