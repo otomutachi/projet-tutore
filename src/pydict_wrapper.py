@@ -56,7 +56,6 @@ def _charger_lexiques_wn() -> None:
     try:
         lexiques = {lex.id.lower() for lex in wn.lexicons()}
     except Exception:
-        pass
         lexiques = []
 
     for ressource in ("oewn:2021", "omw-en:1.4", "omw-fr:1.4"):
