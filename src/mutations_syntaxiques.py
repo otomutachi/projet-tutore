@@ -141,6 +141,10 @@ def permutation_mots(chaine: str, proba: float) -> str:
     return PermutationMots().appliquer(chaine, proba)
 
 
+def dilution_contexte(chaine: str, proba: float = 0.5, seed=None) -> str:
+    return DilutionContexte().appliquer(chaine, proba, seed)
+
+
 def _nettoyer_espaces(texte: str) -> str:
     """Nettoie les espaces inutiles."""
     texte = texte.strip()
