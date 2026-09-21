@@ -229,7 +229,7 @@
     "prompts": [
       {
         "original": "Projet tutoré sur les prompts",
-        "mute": "Projet tutoré sur les prompts"
+        "mute": "Project tutoré sur les prompts"
       },
       {
         "original": "Chaîne de caractères en entrée",
@@ -243,11 +243,11 @@
     "prompts": [
       {
         "original": "Projet tutoré sur les prompts",
-        "mute": "Projet tutoré le le prompt"
+        "mute": "Project tutoré on on prompt"
       },
       {
         "original": "Chaîne de caractères en entrée",
-        "mute": "Chaîne des caractères dans entrée"
+        "mute": "Chain of the caractères in entry"
       }
     ]
   }

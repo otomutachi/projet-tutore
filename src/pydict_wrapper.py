@@ -267,19 +267,15 @@ def obtenir_synonyme(mot: str, seed=None) -> Optional[str]:
 
 @lru_cache(maxsize=4096)
 def obtenir_traduction(mot: str, seed=None) -> Optional[str]:
-    """Retourne une reformulation française par aller-retour Argos."""
+    """Retourne la traduction directe d'un mot vers l'anglais via Argos."""
     if not mot or argos_translate is None:
         return None
 
     try:
         _installer_modele_argos("fr", "en")
         anglais = _traduire_mot(mot, argos_translate, "en")
-        if not anglais or anglais.lower() == mot.lower():
-            return None
-        _installer_modele_argos("en", "fr")
-        retour = _traduire_mot(anglais, argos_translate, "fr")
-        if retour and retour.lower() != mot.lower():
-            return retour
+        if anglais and anglais.lower() != mot.lower():
+            return anglais
     except Exception:
         pass
     return None

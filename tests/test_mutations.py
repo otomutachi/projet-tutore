@@ -47,6 +47,7 @@ from runner import (
     presenter_mutation,
 )
 import runner
+import pydict_wrapper
 from helpers import charger_prompts_cve
 
 
@@ -120,6 +121,11 @@ class TestMutations(unittest.TestCase):
             ):
                 resultat = traduction_vers("projet", "en", 1.0, seed=7)
 
+        self.assertEqual(resultat, "project")
+
+    def test_obtenir_traduction_retourne_anglais_directement(self):
+        with patch.object(pydict_wrapper, "argos_translate", object()), patch.object(pydict_wrapper, "_installer_modele_argos"), patch.object(pydict_wrapper, "_traduire_mot", return_value="project"):
+            resultat = pydict_wrapper.obtenir_traduction("projet", seed=7)
         self.assertEqual(resultat, "project")
 
     def test_traduction_anglais_mot_connu_exact_projet(self):
